@@ -1,0 +1,9 @@
+# ignore following files
+.DS_Store
+.settings
+.idea
+*.iml
+node_modules
+dist
+public
+
