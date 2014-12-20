@@ -1,8 +1,11 @@
+#!/usr/bin/env node
 
-var Server = require('../lib/server'),
-	server_conf = require('../conf/server_conf.js'),
-	casino_conf = require('../conf/casino_conf.js');
+var Server = require('../lib/login_server'),
+	Casino = require('../lib/casino'),
+	conf = require('../conf/casino.conf.js');
 
-var service = Server().setupCasino( casino_conf ).startServer( server_conf );
+var server = Server().startup( conf );
+var casino = Casino().startup( conf );
+
 
 

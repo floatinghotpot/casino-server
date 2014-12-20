@@ -18,11 +18,11 @@ gulp.task('default', ['clean', 'build'], function(){
 });
 
 gulp.task('clean', function(cb) {
-	del(['dist', 'public'], cb);
+	del(['tmp', 'www/*'], cb);
 });
 
 gulp.task('lint', function() {
-  return gulp.src(['./lib/*.js', './app/*.js', './conf/*.js', './bin/*.js'])
+  return gulp.src(['./lib/*.js', './wwwsrc/*.js', './conf/*.js', './bin/*.js'])
     .pipe(jshint())
     .pipe(jshint.reporter('default'));
 });
@@ -37,42 +37,42 @@ gulp.task('unit-test', function () {
 });
 
 gulp.task('auto-ut', ['unit-test'], function(){
-	gulp.watch(['lib/*.js', 'conf/*.js', 'spec/*.js'], ['unit-test']);
+	gulp.watch(['./lib/*.js', './conf/*.js', './spec/*.js'], ['unit-test']);
 });
 
 gulp.task('build', ['build-html', 'build-js', 'build-css', 'build-img'], function(){
 });
 
 gulp.task('build-html', function(){
-	gulp.src('./app/index.html')
-		.pipe(gulp.dest('./public'));
+	gulp.src('./wwwsrc/index.html')
+		.pipe(gulp.dest('./www'));
 });
 
 gulp.task('build-js', ['browserify'], function(){
-	gulp.src('dist/main.js')
+	gulp.src('tmp/main.js')
 	    //.pipe(uglify())
-	    .pipe(gulp.dest('./public'));
+	    .pipe(gulp.dest('./www'));
 });
 
 gulp.task('browserify', function(){
-    return browserify('./app/main.js')
+    return browserify('./wwwsrc/main.js')
 	    .bundle()
 	    .pipe(source('main.js'))
-	    .pipe(gulp.dest('./dist'));
+	    .pipe(gulp.dest('./tmp'));
 });
 
 gulp.task('build-css', function(){
-	return gulp.src(['./app/main.css', './app/*.css'])
+	return gulp.src(['./wwwsrc/main.css', './wwwsrc/*.css'])
 		.pipe(concat('main.css'))
 		.pipe(myth())
 		//.minifycss(({keepBreaks:true}))
-		.pipe(gulp.dest('./public'));
+		.pipe(gulp.dest('./www'));
 });
 
 gulp.task('build-img', function(){
-	gulp.src(['./app/img/*'])
+	gulp.src(['./wwwsrc/img/*'])
 		//.pipe(imagemin())
-		.pipe(gulp.dest('./public/img/'));
+		.pipe(gulp.dest('./www/img/'));
 });
 
 // start a server
@@ -103,7 +103,7 @@ gulp.task('browser-sync', function() {
 	// we will not use the static file, as we need the socket.io client js code 
     return browsersync({
         server: {
-            baseDir: './public'
+            baseDir: './www'
         }
     });
 });
@@ -112,8 +112,8 @@ gulp.task('auto-e2e', ['build', 'e2e-test', 'browser-sync'], function(){
 	
 	gulp.watch(['lib/*.js', 'conf/*.js', 'test/test_e2e.js'], ['e2e-test']);
 	
-	gulp.watch(['./app/*.html'], ['build-html', browsersync.reload]);
-	gulp.watch(['./app/main.js', './app/js/*.js', './lib/*.js'], ['build-js', browsersync.reload]);
-	gulp.watch(['./app/css/*.css'], ['build-css', browsersync.reload]);
-	gulp.watch(['./app/img/*'], ['build-img', browsersync.reload]);
+	gulp.watch(['./wwwsrc/*.html'], ['build-html', browsersync.reload]);
+	gulp.watch(['./wwwsrc/main.js', './wwwsrc/js/*.js', './lib/*.js'], ['build-js', browsersync.reload]);
+	gulp.watch(['./wwwsrc/css/*.css'], ['build-css', browsersync.reload]);
+	gulp.watch(['./wwwsrc/img/*'], ['build-img', browsersync.reload]);
 });

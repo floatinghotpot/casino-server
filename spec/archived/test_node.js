@@ -13,6 +13,11 @@ describe("A suite for javascript", function() {
 		expect(1 << 32).toBe(1);
 	});
 	
+	it('test time', function() {
+		console.log(new Date().getTime());
+		console.log((new Date()).getTime());
+	});
+	
 	it('test array operation', function() {
 		expect([ 1 ].join('')).toBe([ 1 ].join(''));
 	});

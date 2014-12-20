@@ -1,15 +1,20 @@
 
-var Server = require('../lib/server'),
-	server_conf = require('../conf/server_conf.js'),
-	casino_conf = require('../conf/casino_conf.js');
+var Server = require('../lib/login_server'),
+	Casino = require('../lib/game_server'),
+	conf = require('../conf/casino.conf');
 
 describe("A suite for data model", function() {
+	var server, casino;
+	
 	beforeEach(function() {
-		var server = Server();
-		
-		if(server.is_started) server.stopServer().closeCasino();
+		server = Server(), casino = Casino();
 
-		server.setupCasino( casino_conf ).startServer( server_conf );
+		// stop if running
+		server.shutdown();
+		casino.shutdown();
+		
+		casino.startup( conf );
+		server.startup( conf );
 	});
 
 	afterEach(function() {
@@ -17,6 +22,6 @@ describe("A suite for data model", function() {
 	});
 	
 	it('test service', function(){
-		
+		console.log('test');
 	});
 });
