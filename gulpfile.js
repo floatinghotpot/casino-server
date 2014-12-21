@@ -36,8 +36,8 @@ gulp.task('unit-test', function () {
         }));
 });
 
-gulp.task('auto-ut', ['unit-test'], function(){
-	gulp.watch(['./lib/*.js', './conf/*.js', './spec/*.js'], ['unit-test']);
+gulp.task('auto-ut', ['unit-test', 'build'], function(){
+	gulp.watch(['./lib/*.js', './conf/*.js', './spec/*.js'], ['unit-test', 'build']);
 });
 
 gulp.task('build', ['build-html', 'build-js', 'build-css', 'build-img'], function(){

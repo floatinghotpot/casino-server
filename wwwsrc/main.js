@@ -136,6 +136,10 @@ function echo2(err, ret) {
 	addMsg( JSON.stringify(ret) );
 }
 
+function echeOnErr(err, ret) {
+	if(err) addMsg(ret);
+}
+
 function showRoom(ret) {
 	$('#seats').empty();
 	$('#roomname').text(ret.id + ' (' + ret.name + ')');
@@ -229,9 +233,9 @@ function execCmd() {
 	case 'say':
 		words.shift();
 		var args = words.join(' ');
-		client.say(args);
+		client.say( args, echeOnErr );
 		break;
 	default:
-		client.say( cmd );
+		client.say( cmd, echeOnErr );
 	}
 }
