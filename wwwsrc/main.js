@@ -54,6 +54,15 @@ $(document).ready(function(){
 	client.on('look', function(ret){
 		showRoom(ret);
 	});
+	
+	client.on('disconnect', function(ret){
+		console.log(ret);
+		addMsg(ret);
+		
+		client.uid = null;
+		client.pin = null;
+		client.profile = {};
+	});
 
 	$('#m').focus();
 	$('form').submit(function(e) {
@@ -70,7 +79,7 @@ function login(u, p) {
 		} else {
 			localStorage.setItem('x_userid', u);
 			localStorage.setItem('x_passwd', p);
-			addMsg('hi ' + ret.profile.name + ', login success');
+			addMsg('hi ' + ret.profile.name + ', login success, sid:' + ret.token.sid);
 			
 			list_games();
 		}
@@ -129,6 +138,7 @@ function echo2(err, ret) {
 
 function showRoom(ret) {
 	$('#seats').empty();
+	$('#roomname').text(ret.id + ' (' + ret.name + ')');
 	
 	var gamers = ret.gamers;
 	var seats = ret.seats;
@@ -181,6 +191,9 @@ function execCmd() {
 	case 'rooms':
 		list_rooms( words[1] );
 		break;
+	case 'entergame':
+		client.entergame(words[1], echo2);
+		break;
 	case 'enter':
 		client.enter(words[1], echo2);
 		break;
@@ -189,7 +202,6 @@ function execCmd() {
 			if(err) echo(ret);
 			else {
 				showRoom(ret);
-				$('#roomname').text(ret.id + '(' + ret.name + ')');
 			}
 		});
 		break;

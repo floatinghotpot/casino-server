@@ -12,9 +12,9 @@ exports = module.exports = {
 	},
 	games: {
 		'game1': {
-			name: 'classic_jinhua',
-			desc: '',
-			game: 'jinhua_game.js',
+			name: 'simple_room',
+			desc: 'simple room for testing',
+			game: 'room.js',
 			options: {
 				no_joker:true,
 				no_number:[]
@@ -23,8 +23,19 @@ exports = module.exports = {
 			max: 200
 		},
 		'game2': {
+			name: 'classic_jinhua',
+			desc: 'jinhua game with classic rules',
+			game: 'jinhua_game.js',
+			options: {
+				no_joker:true,
+				no_number:[]
+			},
+			min: 2,
+			max: 200
+		},
+		'game3': {
 			name: 'pk jinhua',
-			desc: '',
+			desc: 'jinhua game with number>6',
 			game: 'jinhua_game.js',
 			options: {
 				no_joker:true,
@@ -33,9 +44,9 @@ exports = module.exports = {
 			min: 2,
 			max: 200
 		},
-		'game3': {
+		'game4': {
 			name: 'joker jinhua',
-			desc: '',
+			desc: 'jinhua game with number>6 and magic joker',
 			game: 'jinhua_game.js',
 			options: {
 				no_joker:false,
