@@ -27,41 +27,40 @@ $(document).ready(function(){
 
 	client = new Client(socket);
 	
-	client.on('enter', function(ret){
-		addMsg(ret.who.name + ' came into room ' + ret.where);
-	});
-	
-	client.on('exit', function(ret){
-		addMsg(ret.who.name + ' left room ' + ret.where);
-	});
-
-	client.on('takeseat', function(ret){
-		addMsg(ret.who.name + ' take seat ' + ret.where);
-	});
-
-	client.on('unseat', function(ret){
-		addMsg(ret.who.name + ' stand up from ' + ret.where);
-	});
-
 	client.on('shout', function(ret){
 		addMsg(ret.who.name + ' shout: ' + ret.msg);
-	});
-	
-	client.on('say', function(ret){
-		addMsg(ret.who.name + ' say: ' + ret.msg);
 	});
 	
 	client.on('look', function(ret){
 		showRoom(ret);
 	});
 	
+	client.on('enter', function(ret){
+		addMsg(ret.who.name + ' came into room ' + ret.where);
+		showRoom(client.room);
+	});
+	
+	client.on('exit', function(ret){
+		addMsg(ret.who.name + ' left room ' + ret.where);
+		showRoom(client.room);
+	});
+
+	client.on('takeseat', function(ret){
+		addMsg(ret.who.name + ' take seat ' + ret.where);
+		showRoom(client.room);
+	});
+
+	client.on('unseat', function(ret){
+		addMsg(ret.who.name + ' stand up from ' + ret.where);
+		showRoom(client.room);
+	});
+
+	client.on('say', function(ret){
+		addMsg(ret.who.name + ' say: ' + ret.msg);
+	});
+	
 	client.on('disconnect', function(ret){
-		console.log(ret);
 		addMsg(ret);
-		
-		client.uid = null;
-		client.pin = null;
-		client.profile = {};
 	});
 
 	$('#m').focus();
@@ -140,12 +139,13 @@ function echeOnErr(err, ret) {
 	if(err) addMsg(ret);
 }
 
-function showRoom(ret) {
+function showRoom(room) {
 	$('#seats').empty();
-	$('#roomname').text(ret.id + ' (' + ret.name + ')');
+	$('#roomname').text(room.id + ' (' + room.name + ')');
 	
-	var gamers = ret.gamers;
-	var seats = ret.seats;
+	var gamers = room.gamers;
+	var seats = room.seats;
+	$('#seats').append($('<li>').text('gamers:' + Object.keys(gamers).join(', ')));
 	for(var i=0, len=seats.length; i<len; i++) {
 		var uid = seats[i];
 		var g = uid ? gamers[ uid ] : null;
@@ -196,10 +196,10 @@ function execCmd() {
 		list_rooms( words[1] );
 		break;
 	case 'entergame':
-		client.entergame(words[1], echo2);
+		client.entergame(words[1], echeOnErr);
 		break;
 	case 'enter':
-		client.enter(words[1], echo2);
+		client.enter(words[1], echeOnErr);
 		break;
 	case 'look':
 		client.look(function(err, ret){
@@ -220,10 +220,10 @@ function execCmd() {
 		});
 		break;
 	case 'takeseat':
-		client.rpc('takeseat', words[1], echo2);
+		client.rpc('takeseat', words[1], echeOnErr);
 		break;
 	case 'unseat':
-		client.rpc('unseat', 0, echo2);
+		client.rpc('unseat', 0, echeOnErr);
 		break;
 	case 'shout':
 		words.shift();

@@ -1,6 +1,7 @@
 exports = module.exports = {
 	server: {
 		port: 7000,
+		host: '0.0.0.0',
 		hellomsg: 'welcome to online casino',
 		server: 20141201,
 		client_req: 20141130

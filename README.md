@@ -57,7 +57,3 @@ Now you can visit http://localhost:7000 to view your online casino server
 
 -a Address to use (defaults to 0.0.0.0)
 
--o Open browser window after staring the server
-
--h or --help Print this list and exit.
-

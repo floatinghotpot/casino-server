@@ -5,5 +5,4 @@
 *.iml
 node_modules
 dist
-public
-
+tmp
