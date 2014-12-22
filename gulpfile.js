@@ -27,7 +27,7 @@ gulp.task('lint', function() {
     .pipe(jshint.reporter('default'));
 });
 
-gulp.task('unit-test', function () {
+gulp.task('unit-test', ['lint'], function () {
     return gulp.src('spec/*.js')
         .pipe(jasmine({
         	//isVerbose: true,

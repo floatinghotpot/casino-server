@@ -22,6 +22,6 @@ describe("A suite for data model", function() {
 	});
 	
 	it('test service', function(){
-		console.log('test');
+		//console.log('test');
 	});
 });

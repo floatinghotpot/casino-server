@@ -113,10 +113,10 @@ function list_rooms( gameid ) {
 			list.empty();
 			for(var i=0; i<ret.length; i++) {
 				var room = ret[i];
-				var str = 'room id: ' + room.id 
-				+ ', name: "' + room.name 
-				+ '", seats: ' + room.seats_taken + '/' + room.seats_count 
-				+ ', gamers:' + room.gamers_count;
+				var str = 'room id: ' + room.id + 
+					', name: "' + room.name +
+					'", seats: ' + room.seats_taken + '/' + room.seats_count + 
+					', gamers:' + room.gamers_count;
 				list.append($('<li>').text(str));
 			}
 		}
@@ -161,7 +161,7 @@ function showRoom(room) {
 
 function execCmd() {
 	var cmd = $('#m').val() + '';
-	if(cmd.length == 0) return false;
+	if(cmd.length === 0) return false;
 	$('#m').val('');
 	$('#m').focus();
 	
@@ -227,13 +227,11 @@ function execCmd() {
 		break;
 	case 'shout':
 		words.shift();
-		var args = words.join(' ');
-		client.shout(args);
+		client.shout(words.join(' '));
 		break;
 	case 'say':
 		words.shift();
-		var args = words.join(' ');
-		client.say( args, echeOnErr );
+		client.say( words.join(' '), echeOnErr );
 		break;
 	default:
 		client.say( cmd, echeOnErr );

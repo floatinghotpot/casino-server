@@ -114,10 +114,10 @@ function list_rooms( gameid ) {
 			list.empty();
 			for(var i=0; i<ret.length; i++) {
 				var room = ret[i];
-				var str = 'room id: ' + room.id 
-				+ ', name: "' + room.name 
-				+ '", seats: ' + room.seats_taken + '/' + room.seats_count 
-				+ ', gamers:' + room.gamers_count;
+				var str = 'room id: ' + room.id + 
+					', name: "' + room.name +
+					'", seats: ' + room.seats_taken + '/' + room.seats_count + 
+					', gamers:' + room.gamers_count;
 				list.append($('<li>').text(str));
 			}
 		}
@@ -162,7 +162,7 @@ function showRoom(room) {
 
 function execCmd() {
 	var cmd = $('#m').val() + '';
-	if(cmd.length == 0) return false;
+	if(cmd.length === 0) return false;
 	$('#m').val('');
 	$('#m').focus();
 	
@@ -228,13 +228,11 @@ function execCmd() {
 		break;
 	case 'shout':
 		words.shift();
-		var args = words.join(' ');
-		client.shout(args);
+		client.shout(words.join(' '));
 		break;
 	case 'say':
 		words.shift();
-		var args = words.join(' ');
-		client.say( args, echeOnErr );
+		client.say( words.join(' '), echeOnErr );
 		break;
 	default:
 		client.say( cmd, echeOnErr );
@@ -275,20 +273,16 @@ Client.prototype.setUplink = function(socket) {
 			if(! event) return;
 			
 			var args = msg.args;
-			
+			var target;
 			if(msg.uid) {
-				var target = socket.gamers[ msg.uid ];
-				if(! target) return;
-				
-				target.onPush( event, args );
+				target = socket.gamers[ msg.uid ];
+				if(target) target.onPush( event, args );
 				
 			} else {
 				var gamers = socket.gamers;
 				for(var uid in gamers) {
-					var target = gamers[ uid ];
-					if(! target) return;
-					
-					target.onPush( event, args );
+					target = gamers[ uid ];
+					if(target) target.onPush( event, args );				
 				}
 			}
 		});
@@ -372,7 +366,6 @@ Client.prototype.removeUplink = function() {
 Client.prototype.signup = function login( args, func ) {
 	if(typeof func !== 'function') {
 		throw 'need a callback func(err,ret)';
-		return;
 	}
 	
 	var socket = this.uplink;
@@ -390,7 +383,6 @@ Client.prototype.signup = function login( args, func ) {
 Client.prototype.login = function login( uid, passwd, func ) {
 	if(typeof func !== 'function') {
 		throw 'need a callback func(err,ret)';
-		return;
 	}
 	
 	var socket = this.uplink;
@@ -422,7 +414,6 @@ Client.prototype.login = function login( uid, passwd, func ) {
 Client.prototype.logout = function logout( func ) {
 	if(typeof func !== 'function') {
 		throw 'need a callback func(err,ret)';
-		return;
 	}
 
 	if(! this.uid) {
@@ -456,7 +447,6 @@ Client.prototype.logout = function logout( func ) {
 Client.prototype.rpc = function(method, args, func) {
 	if(typeof func !== 'function') {
 		throw 'need a callback func(err,ret)';
-		return;
 	}
 
 	if(! this.uid) {
@@ -546,7 +536,7 @@ var JINHUA_PATTERNS = {
 	6: '豹子'
 };
 
-var Jinhua = exports = module.exports = {
+var Jinhua = {
 	DANZHANG: 	1,
 	DUIZI: 		2,
 	SHUNZI: 	3,
@@ -556,6 +546,8 @@ var Jinhua = exports = module.exports = {
 	
 	PATTERNS: JINHUA_PATTERNS,
 };
+
+exports = module.exports = Jinhua;
 
 Jinhua.sort = function(cards) {
 	if(cards.length != 3) return cards;
@@ -683,7 +675,9 @@ POKER_CARDS[ RED_JOKER ] = '@';
 POKER_CARDS[ BLACK_JOKER ] = '*';
 POKER_CARDS[ 0 ] = '?';
 
-var Poker = exports = module.exports = function(str){
+exports = module.exports = Poker;
+
+function Poker(str){
 	if(typeof str === 'string') {
 		var c = POKER_COLOR_RANK[ str.charAt(0) ];
 		var n = POKER_NUMBER_RANK[ str.substring(1) ];
@@ -701,7 +695,7 @@ var Poker = exports = module.exports = function(str){
 	} else {
 		return 0;
 	}
-};
+}
 
 Poker.RED_JOKER = RED_JOKER;
 Poker.BLACK_JOKER = BLACK_JOKER;
@@ -752,7 +746,7 @@ Poker.newSet = function( options ) {
 	if(! no_joker) {
 		cards.push( RED_JOKER );
 		cards.push( BLACK_JOKER );
-	};
+	}
 	
 	return cards;
 };
