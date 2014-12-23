@@ -8,6 +8,12 @@ var argv = require('minimist')(process.argv.slice(2));
 
 if(argv.p) conf.server.port = argv.p;
 if(argv.a) conf.server.host = argv.a;
+
+if(argv.r) {
+	var words = argv.r.split(':');
+	if(words[0]) conf.redis.host = words[0];
+	if(words[1]) conf.redis.port = parseInt(words[1]);
+}
 	
 var server = Server().startup( conf );
 var casino = Casino().startup( conf );

@@ -242,9 +242,7 @@ function execCmd() {
 },{"../lib/client":2,"../lib/jinhua_poker":3,"../lib/poker":4}],2:[function(require,module,exports){
 exports = module.exports = Client;
 
-function Client( socket ) {
-	if(!(this instanceof Client)) return new Client( socket );
-	
+function Client( socket ) {	
 	this.uid = null;
 	this.pin = null;
 	this.profile = {};

@@ -12,7 +12,7 @@ exports = module.exports = {
 		passwd: null
 	},
 	games: {
-		'game1': {
+		'chat': {
 			name: 'simple_room',
 			desc: 'simple room for testing',
 			game: 'room.js',
@@ -23,7 +23,7 @@ exports = module.exports = {
 			min: 2,
 			max: 200
 		},
-		'game2': {
+		'jinhua1': {
 			name: 'classic_jinhua',
 			desc: 'jinhua game with classic rules',
 			game: 'jinhua_game.js',
@@ -34,7 +34,7 @@ exports = module.exports = {
 			min: 2,
 			max: 200
 		},
-		'game3': {
+		'jinhua2': {
 			name: 'pk jinhua',
 			desc: 'jinhua game with number>6',
 			game: 'jinhua_game.js',
@@ -45,7 +45,7 @@ exports = module.exports = {
 			min: 2,
 			max: 200
 		},
-		'game4': {
+		'jinhua3': {
 			name: 'joker jinhua',
 			desc: 'jinhua game with number>6 and magic joker',
 			game: 'jinhua_game.js',

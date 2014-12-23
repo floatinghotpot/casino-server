@@ -3,65 +3,66 @@
 An online poker game server powered by node.js and socket.io
   
 Game rules supported:
-- [x] Jinhua (Õ©½ð»¨/ÈýÕÅÅÆ)
-- [ ] Texas Holdem (µÂÖÝÆË¿Ë)
-- [ ] Fight Landlord (¶·µØÖ÷)
-- [ ] Blackjack (21µã)
+- [x] Jinhua (è¯ˆé‡‘èŠ±/ä¸‰å¼ ç‰Œ)
+- [ ] Texas Holdem (å¾·å·žæ‰‘å…‹)
+- [ ] Fight Landlord (æ–—åœ°ä¸»)
+- [ ] Blackjack (21ç‚¹)
 
 Features: 
-- [x] Using redis as message bus and data storage.
+- [x] Scalable: using redis as message bus and data storage.
 - [x] Cluster: using node.js cluster, sticky session, and socket.io-redis.
 - [x] Load balancing: using NginX as load balancer.
-- [x] Come with a web interface to test basic features.
+- [x] Cross-platform: come with a web interface to test websocket features.
 
 # Architecture #
 
 ![Architecture](https://github.com/floatinghotpot/casino-server/raw/master/docs/architecture.png)
 
-# Installing globally: #
+## Required ##
 
-Run as 
+* Redis
+
+Redis is an open source, BSD licensed, advanced key-value cache and store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets, sorted sets, bitmaps and hyperloglogs.
+
+[Download](http://redis.io/download)
+
+* node.js / npm
+
+Node.jsÂ® is a platform built on Chrome's JavaScript runtime for easily building fast, scalable network applications. Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient, perfect for data-intensive real-time applications that run across distributed devices.
+
+[Download](http://nodejs.org/download)
+
+# Installation #
+
+* Installing globally and run as service: 
 ```bash
-[sudo] npm install casino-server -g
-```
-
-## Usage: ##
-
-```bash
-casino-server [path] [options]
-
-# install redis-server first
-[sudo] apt-get install redis-server
-
-# or run as service
 [sudo] npm install forever -g
-forever start casino-server
+[sudo] npm install casino-server -g
 
-# open a browser to access the test web page
-open http://localhost:7000/
+# run as service
+forever start casino-server
 ```
 
-```[path]``` defaults to ```./public``` if the folder exists, and ```./``` otherwise.
-
-# Installing as a node app #
+* Installing as a node app, and run in current folder:
 
 ```bash
 mkdir myapp
 cd myapp/
 npm install casino-server
+node bin/casino-server [options]
 ```
 
-## Usage: ##
+Now you can visit http://localhost:7000, it's a web-based game client for testing and demo purpose.
 
 ```bash
-node bin/casino-server
+# open a browser to access the test web page
+open http://localhost:7000/
 ```
-
-Now you can visit http://localhost:7000 to view your online casino server
 
 # Available Options: #
 
 -p Port to use (defaults to 7000)
-
 -a Address to use (defaults to 0.0.0.0)
+-r Address of Redis server (defaults to 127.0.0.1:6379)
+
 
