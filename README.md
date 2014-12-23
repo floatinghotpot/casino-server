@@ -39,6 +39,9 @@ Node.js® is a platform built on Chrome's JavaScript runtime for easily building
 [sudo] npm install forever -g
 [sudo] npm install casino-server -g
 
+# run redis-server first
+redis-server &
+
 # run as service
 forever start casino-server
 ```
@@ -62,7 +65,9 @@ open http://localhost:7000/
 # Available Options: #
 
 -p Port to use (defaults to 7000)
+
 -a Address to use (defaults to 0.0.0.0)
+
 -r Address of Redis server (defaults to 127.0.0.1:6379)
 
 
