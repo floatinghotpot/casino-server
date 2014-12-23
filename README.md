@@ -9,9 +9,14 @@ Game rules supported:
 - [ ] Blackjack (21µã)
 
 Features: 
+- [x] Using redis as message bus and data storage.
 - [x] Cluster: using node.js cluster, sticky session, and socket.io-redis.
 - [x] Load balancing: using NginX as load balancer.
 - [x] Come with a web interface to test basic features.
+
+# Architecture #
+
+![Architecture](https://github.com/floatinghotpot/casino-server/raw/master/docs/architecture.png)
 
 # Installing globally: #
 
@@ -24,6 +29,9 @@ Run as
 
 ```bash
 casino-server [path] [options]
+
+# install redis-server first
+[sudo] apt-get install redis-server
 
 # or run as service
 [sudo] npm install forever -g

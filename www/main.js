@@ -7,7 +7,7 @@ var Client = require('../lib/client'),
 var client = null;
 
 $(document).ready(function(){
-	var socket = io('http://localhost:7000');
+	var socket = io();
 	
 	console.log(socket);
 	socket.log_traffic = true;
