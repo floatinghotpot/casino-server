@@ -27,7 +27,7 @@ gulp.task('lint', function() {
     .pipe(jshint.reporter('default'));
 });
 
-gulp.task('unit-test', ['lint'], function () {
+gulp.task('unit-test', function () {
     return gulp.src('spec/*.js')
         .pipe(jasmine({
         	//isVerbose: true,
@@ -44,7 +44,7 @@ gulp.task('build-html', function(){
 		.pipe(gulp.dest('www'));
 });
 
-gulp.task('build-js', ['browserify'], function(){
+gulp.task('build-js', ['lint', 'browserify'], function(){
 	gulp.src('wwwsrc/js/*')
 		.pipe(gulp.dest('www/js/'));
 	

@@ -42,6 +42,17 @@ $(document).ready(function(){
 	 *     allin: true
 	 *   }
 	 */
+	function onBtnClicked(e) {
+		client.rpc($(this).attr('id'), $(this).attr('arg'), echoOnErr);
+	}
+	function onInputBtnClicked(e){
+		var method = $(this).attr('id');
+		client.rpc($(this).attr('id'), $('input#'+method).val(), echoOnErr);
+		$('input#'+method).val('');
+	}
+	function onInputBoxEnter(e) {
+		if(e.which == 13) onInputBtnClicked(e);
+	}
 	client.on('prompt', function(cmds){
 		var btn;
 		var div;
@@ -52,11 +63,35 @@ $(document).ready(function(){
 				$('button#'+k).remove();
 				
 			} else if(v === true) {
-				btn = $('<button>').text(k).attr('id', k).addClass('cmd');
+				btn = $('<button>').text(k).attr('id', k).attr('arg', 0).addClass('cmd');
 				$('#cmds').append(btn);
-				btn.on('click', function(e){
-					client.rpc($(this).attr('id'), 0, echoOnErr);
-				});
+				btn.on('click', onBtnClicked);
+				
+			} else if(typeof v === 'string') {
+				div = $('<div>').attr('id',k).addClass('cmd');
+				$('#cmds').append(div);
+				var words = v.split(',');
+				var input = $('<input>').attr('id', k).addClass('cmd');
+				switch(words[0]) {
+				case 'text':
+					input.attr('type', 'text').attr('size',60);
+					break;
+				case 'range':
+					input.attr('type', 'range');
+					if(words[1]) input.attr('min', parseInt(words[1]));
+					if(words[2]) input.attr('max', parseInt(words[2]));
+					break;
+				case 'number':
+					input.attr('type', 'number').attr('size',5);
+					if(words[1]) input.attr('min', parseInt(words[1]));
+					if(words[2]) input.attr('max', parseInt(words[2]));
+					break;
+				}
+				div.append(input);
+				btn = $('<button>').text(k).attr('id', k).addClass('cmd');
+				div.append(btn);
+				btn.on('click', onInputBtnClicked);
+				input.keydown(onInputBoxEnter);
 				
 			} else if( Object.prototype.toString.call( v ) === '[object Array]' ) {
 				div = $('<div>').attr('id',k).addClass('cmd');
@@ -65,39 +100,9 @@ $(document).ready(function(){
 					var arg = v[i];
 					btn = $('<button>').text(k+' '+arg).attr('id', k).attr('arg', arg).addClass('cmd');
 					div.append(btn);
-					btn.on('click', function(e){
-						client.rpc($(this).attr('id'), $(this).attr('arg'), echoOnErr);
-					});
+					btn.on('click', onBtnClicked);
 				}
 				
-			} else if(typeof v === 'string') {
-				div = $('<div>').attr('id',k).addClass('cmd');
-				$('#cmds').append(div);
-				var words = v.split(',');
-				var input = $('<input>').prop('type', 'text').attr('id', k).addClass('cmd');
-				switch(words[0]) {
-				case 'text':
-					input.attr('size',60);
-					break;
-				case 'range':
-					input.attr('size',5);
-					break;
-				}
-				div.append(input);
-				btn = $('<button>').text(k).attr('id', k).addClass('cmd');
-				div.append(btn);
-				btn.on('click', function(e){
-					var method = $(this).attr('id');
-					client.rpc($(this).attr('id'), $('input#'+method).val(), echoOnErr);
-					$('input#'+method).val('');
-				});
-				input.keydown(function(e){
-					if(e.which == 13) {
-						var method = $(this).attr('id');
-						client.rpc($(this).attr('id'), $('input#'+method).val(), echoOnErr);
-						$('input#'+method).val('');
-					}
-				});
 			} else {
 				
 			}
