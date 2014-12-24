@@ -13,8 +13,8 @@ exports = module.exports = {
 	},
 	games: {
 		'chat': {
-			name: 'simple_room',
-			desc: 'simple room for testing',
+			name: 'chat_room',
+			desc: 'room for chatting only',
 			game: 'room.js',
 			options: {
 				no_joker:true,

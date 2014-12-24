@@ -45,6 +45,9 @@ gulp.task('build-html', function(){
 });
 
 gulp.task('build-js', ['browserify'], function(){
+	gulp.src('wwwsrc/js/*')
+		.pipe(gulp.dest('www/js/'));
+	
 	gulp.src('tmp/main.js')
 	    //.pipe(uglify())
 	    .pipe(gulp.dest('www'));
@@ -110,7 +113,7 @@ gulp.task('auto-ut', ['unit-test', 'build'], function(){
 
 	gulp.watch(['wwwsrc/main.js', 'wwwsrc/js/*.js'], ['build-js']);
 	gulp.watch(['wwwsrc/*.html'], ['build-html']);
-	gulp.watch(['wwwsrc/css/*.css'], ['build-css']);
+	gulp.watch(['wwwsrc/main.css', 'wwwsrc/css/*.css'], ['build-css']);
 	gulp.watch(['wwwsrc/img/*'], ['build-img']);
 });
 
@@ -121,6 +124,6 @@ gulp.task('auto-e2e', ['build', 'restart-casino-server', 'browser-sync'], functi
 	
 	gulp.watch(['wwwsrc/main.js', 'wwwsrc/js/*.js'], ['build-js', browsersync.reload]);
 	gulp.watch(['wwwsrc/*.html'], ['build-html', browsersync.reload]);
-	gulp.watch(['wwwsrc/css/*.css'], ['build-css', browsersync.reload]);
+	gulp.watch(['wwwsrc/main.css', 'wwwsrc/css/*.css'], ['build-css', browsersync.reload]);
 	gulp.watch(['wwwsrc/img/*'], ['build-img', browsersync.reload]);
 });

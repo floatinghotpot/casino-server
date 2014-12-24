@@ -8,10 +8,11 @@ var client = null;
 $(document).ready(function(){
 	var socket = io();
 	
-	console.log(socket);
+	//console.log(socket);
 	socket.log_traffic = true;
 	
 	socket.on('hello', function(data){
+		$('div#cmds').empty();
 		addMsg(data.msg);
 		
 		setTimeout(function(){
@@ -26,6 +27,82 @@ $(document).ready(function(){
 	});
 
 	client = new Client(socket);
+	
+	/*
+	 * cmds {
+	 *     exit: true,
+	 *     unseat: true
+	 *     followchip: true,
+	 *     addchip: [50,100,150],
+	 *     addchip: 'range,0,1000000',
+	 *     giveup: true,
+	 *     pk: ['zhang3', 'li4', 'wang5'],
+	 *     checkcard: true,
+	 *     showcard: true,
+	 *     allin: true
+	 *   }
+	 */
+	client.on('prompt', function(cmds){
+		var btn;
+		var div;
+		for(var k in cmds) {
+			var v = cmds[ k ];
+			if(v === null) {
+				$('div#'+k).remove();
+				$('button#'+k).remove();
+				
+			} else if(v === true) {
+				btn = $('<button>').text(k).attr('id', k).addClass('cmd');
+				$('#cmds').append(btn);
+				btn.on('click', function(e){
+					client.rpc($(this).attr('id'), 0, echoOnErr);
+				});
+				
+			} else if( Object.prototype.toString.call( v ) === '[object Array]' ) {
+				div = $('<div>').attr('id',k).addClass('cmd');
+				$('#cmds').append(div);
+				for(var i=0; i<v.length; i++) {
+					var arg = v[i];
+					btn = $('<button>').text(k+' '+arg).attr('id', k).attr('arg', arg).addClass('cmd');
+					div.append(btn);
+					btn.on('click', function(e){
+						client.rpc($(this).attr('id'), $(this).attr('arg'), echoOnErr);
+					});
+				}
+				
+			} else if(typeof v === 'string') {
+				div = $('<div>').attr('id',k).addClass('cmd');
+				$('#cmds').append(div);
+				var words = v.split(',');
+				var input = $('<input>').prop('type', 'text').attr('id', k).addClass('cmd');
+				switch(words[0]) {
+				case 'text':
+					input.attr('size',60);
+					break;
+				case 'range':
+					input.attr('size',5);
+					break;
+				}
+				div.append(input);
+				btn = $('<button>').text(k).attr('id', k).addClass('cmd');
+				div.append(btn);
+				btn.on('click', function(e){
+					var method = $(this).attr('id');
+					client.rpc($(this).attr('id'), $('input#'+method).val(), echoOnErr);
+					$('input#'+method).val('');
+				});
+				input.keydown(function(e){
+					if(e.which == 13) {
+						var method = $(this).attr('id');
+						client.rpc($(this).attr('id'), $('input#'+method).val(), echoOnErr);
+						$('input#'+method).val('');
+					}
+				});
+			} else {
+				
+			}
+		}
+	});
 	
 	client.on('shout', function(ret){
 		addMsg(ret.who.name + ' shout: ' + ret.msg);
@@ -42,7 +119,11 @@ $(document).ready(function(){
 	
 	client.on('exit', function(ret){
 		addMsg(ret.who.name + ' left room ' + ret.where);
-		showRoom(client.room);
+		if(ret.uid === client.uid) {
+			showRoom(null);
+		} else {
+			showRoom(client.room);
+		}
 	});
 
 	client.on('takeseat', function(ret){
@@ -72,7 +153,7 @@ $(document).ready(function(){
 
 function login(u, p) {
 	client.login(u, p, function(err,ret){
-		console.log(err, ret);
+		//console.log(err, ret);
 		if(err) {
 			echo(ret);
 		} else {
@@ -124,7 +205,14 @@ function list_rooms( gameid ) {
 }
 
 function addMsg(str) {
-	$('#messages').append($('<li>').text(str));
+	$('#messages').append($('<li>').text(str).addClass('msg'));
+	var msgs = $('li.msg');
+	var n = msgs.length - 20;
+	if(n > 0) {
+		for(var i=0; i<n; i++) {
+			msgs[i].remove();
+		}
+	}
 }
 
 function echo(ret) {
@@ -135,12 +223,18 @@ function echo2(err, ret) {
 	addMsg( JSON.stringify(ret) );
 }
 
-function echeOnErr(err, ret) {
+function echoOnErr(err, ret) {
 	if(err) addMsg(ret);
 }
 
 function showRoom(room) {
 	$('#seats').empty();
+	
+	if(! room) {
+		$('#roomname').text('not in room');
+		return;
+	}
+	
 	$('#roomname').text(room.id + ' (' + room.name + ')');
 	
 	var gamers = room.gamers;
@@ -173,7 +267,10 @@ function execCmd() {
 		$('#messages').empty();
 		break;
 	case 'signup':
-		client.signup({}, function(err,ret){
+		client.signup({
+			uid: words[1],
+			passwd: words[2]
+		}, function(err,ret){
 			if(err) {
 				echo(ret);
 			} else {
@@ -196,10 +293,10 @@ function execCmd() {
 		list_rooms( words[1] );
 		break;
 	case 'entergame':
-		client.entergame(words[1], echeOnErr);
+		client.entergame(words[1], echoOnErr);
 		break;
 	case 'enter':
-		client.enter(words[1], echeOnErr);
+		client.enter(words[1], echoOnErr);
 		break;
 	case 'look':
 		client.look(function(err, ret){
@@ -214,16 +311,15 @@ function execCmd() {
 			if(err) echo(ret);
 			else {
 				echo(ret);
-				$('#seats').empty();
-				$('#roomname').text('Not in room');
+				showRoom(null);
 			}
 		});
 		break;
 	case 'takeseat':
-		client.rpc('takeseat', words[1], echeOnErr);
+		client.rpc('takeseat', words[1], echoOnErr);
 		break;
 	case 'unseat':
-		client.rpc('unseat', 0, echeOnErr);
+		client.rpc('unseat', 0, echoOnErr);
 		break;
 	case 'shout':
 		words.shift();
@@ -231,9 +327,9 @@ function execCmd() {
 		break;
 	case 'say':
 		words.shift();
-		client.say( words.join(' '), echeOnErr );
+		client.say( words.join(' '), echoOnErr );
 		break;
 	default:
-		client.say( cmd, echeOnErr );
+		//client.say( cmd, echoOnErr );
 	}
 }

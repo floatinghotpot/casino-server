@@ -5,19 +5,23 @@
 <title>Jinhua Test</title>
 <link rel="stylesheet" href="main.css"/>
 <script src="/socket.io/socket.io.js"></script>
-<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script src="/js/jquery-1.11.2.min.js"></script>
 <script src="main.js"></script>
 </head>
 <body>
-	<div>
+	<div id='env'>
+		<h3>games / rooms:</h3>
 		<ul id="list" class="list"></ul>
-		<h3 id="roomname">Not in room</h3>
+		<h3 id="roomname">not in room</h3>
 		<ul id="seats" class="list"></ul>
 	</div>
+	<div id='logs'>
 	<ul id="messages" class="list"></ul>
+	</div>
 	<form action="">
 		<input id="m" autocomplete="off" />
-		<button>Send</button>
+		<button id='send'>Send</button>
+	<div id='cmds'></div>
 	</form>
 </body>
 </html>
