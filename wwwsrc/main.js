@@ -145,6 +145,18 @@ $(document).ready(function(){
 		addMsg(ret.who.name + ' say: ' + ret.msg);
 	});
 	
+	client.on('deal', function(ret){
+		var room_cards = client.room.cards = {};
+		while(ret.length > 0) {
+			var item = ret.pop();
+			var seat = item[0];
+			var cards = item[1];
+			room_cards[ seat ] = Poker.sortByNumber( cards );
+		}
+		
+		showRoom(client.room);
+	});
+	
 	client.on('disconnect', function(ret){
 		addMsg(ret);
 	});
@@ -244,6 +256,8 @@ function showRoom(room) {
 	
 	var gamers = room.gamers;
 	var seats = room.seats;
+	var cards = room.cards;
+	console.log('cards:', cards);
 	$('#seats').append($('<li>').text('gamers:' + Object.keys(gamers).join(', ')));
 	for(var i=0, len=seats.length; i<len; i++) {
 		var uid = seats[i];
@@ -251,10 +265,13 @@ function showRoom(room) {
 		var str = "#" + i + ': ';
 		if(g) {
 			str += g.uid + ' (' + g.name + ') [' + g.coins + ', ' + g.score + ', ' + g.exp + ', ' + g.level + ']';
+			if(cards) {
+				str += '[ ' + Poker.visualize( cards[i] ) + ' ]';
+			}
 		} else {
 			str += '(empty)';
 		}
-		$('#seats').append($('<li>').text(str));
+		$('#seats').append($('<li>').text(str).attr('id', 'seat'+i));
 	}
 }
 
