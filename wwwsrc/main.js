@@ -51,7 +51,7 @@ $(document).ready(function(){
 		$('input#'+method).val('');
 	}
 	function onInputBoxEnter(e) {
-		if(e.which == 13) onInputBtnClicked(e);
+		if(e.which == 13) onInputBtnClicked.call(this, e);
 	}
 	client.on('prompt', function(cmds){
 		var btn;

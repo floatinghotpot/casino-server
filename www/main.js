@@ -52,7 +52,7 @@ $(document).ready(function(){
 		$('input#'+method).val('');
 	}
 	function onInputBoxEnter(e) {
-		if(e.which == 13) onInputBtnClicked(e);
+		if(e.which == 13) onInputBtnClicked.call(this, e);
 	}
 	client.on('prompt', function(cmds){
 		var btn;
@@ -468,6 +468,8 @@ Client.prototype.signup = function login( args, func ) {
 	}
 	
 	var socket = this.uplink;
+	if(socket.log_traffic) console.log('signup', args);
+	
 	var callback = {
 		seq: ++ socket.rpc_seq,
 		func: func,
@@ -485,6 +487,8 @@ Client.prototype.login = function login( uid, passwd, func ) {
 	}
 	
 	var socket = this.uplink;
+	if(socket.log_traffic) console.log('login', uid, passwd);
+	
 	var client = this;
 	
 	var callback = {
@@ -521,6 +525,8 @@ Client.prototype.logout = function logout( func ) {
 	}
 	
 	var socket = this.uplink;
+	if(socket.log_traffic) console.log('logout');
+	
 	var client = this;
 	var callback = {
 		seq: ++ socket.rpc_seq,
@@ -554,7 +560,7 @@ Client.prototype.rpc = function(method, args, func) {
 	}
 	
 	var socket = this.uplink;
-	if(socket.log_traffic) console.log(method, args);
+	if(socket.log_traffic) console.log('rpc', method, args);
 	
 	var client = this;
 	var callback = {
