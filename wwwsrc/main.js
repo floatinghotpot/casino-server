@@ -31,7 +31,8 @@ $(document).ready(function(){
 	/*
 	 * cmds {
 	 *     exit: true,
-	 *     unseat: true
+	 *     takeseat: true,
+	 *     unseat: true,
 	 *     followchip: true,
 	 *     addchip: [50,100,150],
 	 *     addchip: 'range,0,1000000',
@@ -39,7 +40,6 @@ $(document).ready(function(){
 	 *     pk: ['zhang3', 'li4', 'wang5'],
 	 *     checkcard: true,
 	 *     showcard: true,
-	 *     allin: true
 	 *   }
 	 */
 	function onBtnClicked(e) {
@@ -146,17 +146,74 @@ $(document).ready(function(){
 	});
 	
 	client.on('deal', function(ret){
+		addMsg('dealing cards ...');
+		
+		var deals = ret.deals;
 		var room_cards = client.room.cards = {};
-		while(ret.length > 0) {
-			var item = ret.pop();
-			var seat = item[0];
-			var cards = item[1];
+		var room_chips = client.room.chips = {};
+		var item, seat, cards;
+		while(deals.length > 0) {
+			item = deals.pop();
+			seat = item[0];
+			cards = item[1];
 			room_cards[ seat ] = Poker.sortByNumber( cards );
 		}
 		
 		showRoom(client.room);
+		addMsg('delay ' + ret.delay + ' sec ...');
+		
+		var first = ret.seats[0];
+		addMsg('first turn: ' + first + ', ' + client.room.seats[ first ]);
 	});
 	
+	client.on('moveturn', function(ret){
+		var seat = ret.seat;
+		$('li.seat').removeClass('active');
+		$('li#seat'+seat).addClass('active');
+		
+		addMsg('now: ' + seat + ', ' + ret.uid);
+	});
+	
+	client.on('countdown', function(ret){
+		addMsg('count down: ' + ret.seat + ', ' + ret.sec);
+	});
+	
+	client.on('giveup', function(ret){
+		addMsg( ret.uid + ' at ' + ret.seat + ' give up');
+	});
+	
+	client.on('follow', function(ret){
+		addMsg( ret.uid + ' at ' + ret.seat + ' follow ' + ret.chip);
+	});
+
+	client.on('addchip', function(ret){
+		addMsg( ret.uid + ' at ' + ret.seat + ' addchip ' + ret.chip);
+	});
+
+	client.on('pk', function(ret){
+		addMsg( ret.uid + ' at ' + ret.seat + ' pk ' + ret.pk_uid + ' at ' + ret.pk_uid + ', result: ' + (ret.win?'win':'lost'));
+	});
+	
+	client.on('checkcard', function(ret){
+		addMsg( ret.uid + ' at ' + ret.seat + ' checkcard' );
+		if(ret.cards) {
+			client.room.cards[ parseInt(ret.seat) ] = ret.cards;
+			showRoom(client.room);
+		}
+	});
+	
+	client.on('showcard', function(ret){
+		addMsg( ret.uid + ' at ' + ret.seat + ' showcard' );
+		if(ret.cards) {
+			client.room.cards[ parseInt(ret.seat) ] = ret.cards;
+			showRoom(client.room);
+		}
+	});
+	
+	client.on('gameover', function(ret){
+		addMsg( 'game over! ' + ret.uid + ' at ' + ret.seat + ' win ' + ret.prize);
+	});
+
 	client.on('disconnect', function(ret){
 		addMsg(ret);
 	});
@@ -189,7 +246,7 @@ function login(u, p) {
 }
 
 function list_games(){
-	client.games(function(err, ret){
+	client.rpc('games', 0, function(err, ret){
 		if(err) echo(ret);
 		else {
 			var list = $('#list');
@@ -204,7 +261,7 @@ function list_games(){
 }
 
 function list_rooms( gameid ) {
-	client.rooms(gameid, function(err, ret){
+	client.rpc('rooms', gameid, function(err, ret){
 		if(err) echo(ret);
 		else {
 			var list = $('#list');
@@ -265,13 +322,13 @@ function showRoom(room) {
 		var str = "#" + i + ': ';
 		if(g) {
 			str += g.uid + ' (' + g.name + ') [' + g.coins + ', ' + g.score + ', ' + g.exp + ', ' + g.level + ']';
-			if(cards) {
+			if(cards && cards[i]) {
 				str += '[ ' + Poker.visualize( cards[i] ) + ' ]';
 			}
 		} else {
 			str += '(empty)';
 		}
-		$('#seats').append($('<li>').text(str).attr('id', 'seat'+i));
+		$('#seats').append($('<li>').text(str).attr('id', 'seat'+i).addClass('seat'));
 	}
 }
 
@@ -315,13 +372,13 @@ function execCmd() {
 		list_rooms( words[1] );
 		break;
 	case 'entergame':
-		client.entergame(words[1], echoOnErr);
+		client.rpc('entergame', words[1], echoOnErr);
 		break;
 	case 'enter':
-		client.enter(words[1], echoOnErr);
+		client.rpc('enter', words[1], echoOnErr);
 		break;
 	case 'look':
-		client.look(function(err, ret){
+		client.rpc('look', 0, function(err, ret){
 			if(err) echo(ret);
 			else {
 				showRoom(ret);
@@ -329,7 +386,7 @@ function execCmd() {
 		});
 		break;
 	case 'exit':
-		client.exit(function(err, ret){
+		client.rpc('exit', 0, function(err, ret){
 			if(err) echo(ret);
 			else {
 				echo(ret);
@@ -345,11 +402,11 @@ function execCmd() {
 		break;
 	case 'shout':
 		words.shift();
-		client.shout(words.join(' '));
+		client.rpc('shout', 0, words.join(' '));
 		break;
 	case 'say':
 		words.shift();
-		client.say( words.join(' '), echoOnErr );
+		client.rpc('sat', words.join(' '), echoOnErr );
 		break;
 	default:
 		//client.say( cmd, echoOnErr );

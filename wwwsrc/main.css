@@ -37,12 +37,12 @@ form {
 form input#m {
 	border: 0;
 	padding: 10px;
-	width: 90%;
+	width: 40%;
 	margin-right: .5%;
 }
 
 form button#send {
-	width: 9%;
+	width: 5%;
 	background: rgb(130, 224, 255);
 	border: 1px solid black;
 	padding: 10px;
@@ -77,3 +77,8 @@ input.cmd {
 .list li:nth-child(odd) {
 	background: #eee;
 }
+
+li.active {
+	background: yellow;	
+}
+
