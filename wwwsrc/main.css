@@ -28,6 +28,7 @@ div#logs {
 
 form {
 	background: #000;
+	color: #fff;
 	padding: 3px;
 	position: fixed;
 	bottom: 0;
@@ -48,6 +49,23 @@ form button#send {
 	padding: 10px;
 }
 
+div.dialog {
+	display: inline-block;
+	border: 1px solid gray;
+	vertical-align: top;
+	background: silver;
+	color: black;
+}
+
+div.dlgheader {
+	text-align: right;
+	background: gray;
+}
+
+div.dlgfooter {
+	text-align: right;
+}
+
 div.cmd {
 	display: inline-block;
 }
@@ -59,9 +77,15 @@ button.cmd {
 	margin: 3px;
 }
 
+label.cmd {
+	width: 80px;
+	padding: 5px;
+	margin: 3px;
+}
+
 input.cmd {
-	border: 0;
-	padding: 10px;
+	padding: 5px;
+	margin: 3px;
 }
 
 .list ul {

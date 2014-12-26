@@ -28,7 +28,10 @@ describe("A suite for javascript", function() {
 	
 	it('test object', function() {
 		expect(! {}).toBe(false);
-
+		
+		console.log( typeof {} );
+		console.log( Object.prototype.toString.call( {} ) );
+		
 		var b = {
 			a: 10,
 			b: (function(o){ 

@@ -12,6 +12,8 @@ $(document).ready(function(){
 	//console.log(socket);
 	socket.log_traffic = true;
 	
+	client = new Client(socket);
+	
 	socket.on('hello', function(data){
 		$('div#cmds').empty();
 		addMsg(data.msg);
@@ -22,13 +24,11 @@ $(document).ready(function(){
 			if(u && p) {
 				login(u, p);
 			} else {
-				addMsg('please login, syntax: login username password');
+				socket.emit('hello', {});
 			}
 		}, 1000);
 	});
 
-	client = new Client(socket);
-	
 	/*
 	 * cmds {
 	 *     exit: true,
@@ -44,21 +44,51 @@ $(document).ready(function(){
 	 *   }
 	 */
 	function onBtnClicked(e) {
-		client.rpc($(this).attr('id'), $(this).attr('arg'), echoOnErr);
+		var method = $(this).attr('id');
+		client.rpc(method, $(this).attr('arg'), echoOnErr);
 	}
 	function onInputBtnClicked(e){
 		var method = $(this).attr('id');
-		client.rpc($(this).attr('id'), $('input#'+method).val(), echoOnErr);
+		client.rpc(method, $('input#'+method).val(), echoOnErr);
 		$('input#'+method).val('');
 	}
 	function onInputBoxEnter(e) {
 		if(e.which == 13) onInputBtnClicked.call(this, e);
 	}
+	function onDialogBtnClicked(e) {
+		var method = $(this).attr('id');
+		var dlg = $('div#'+method);
+		var x = ($(window).width() - dlg.width()) / 2;
+		var y = ($(window).height() - dlg.height()) / 2;
+		dlg.show();
+		dlg.css({ 
+			position:'absolute',
+			left: x + 'px', 
+			top: y + 'px'
+		});
+		
+		$(this).hide();
+	}
+	function onDialogXClicked(e) {
+		var method = $(this).attr('X');
+		$('div#'+method).hide();
+		$('button#'+method).show();
+	}
+	function onDialogOKClicked(e) {
+		var method = $(this).attr('OK');
+		var args = {};
+		$('input.' + method).each(function(i, v){
+			var input = $(this);
+			args[ input.attr('id') ] = input.val();
+		});
+		client.rpc(method, args, echoOnErr);
+	}
 	client.on('prompt', function(cmds){
-		var btn;
-		var div;
+		console.log('prompt', cmds);
+		
+		var v, div, btn, words, label, input;
 		for(var k in cmds) {
-			var v = cmds[ k ];
+			v = cmds[ k ];
 			if(v === null) {
 				$('div#'+k).remove();
 				$('button#'+k).remove();
@@ -71,12 +101,9 @@ $(document).ready(function(){
 			} else if(typeof v === 'string') {
 				div = $('<div>').attr('id',k).addClass('cmd');
 				$('#cmds').append(div);
-				var words = v.split(',');
-				var input = $('<input>').attr('id', k).addClass('cmd');
+				input = $('<input>').attr('id', k).addClass('cmd');
+				words = v.split(',');
 				switch(words[0]) {
-				case 'text':
-					input.attr('type', 'text').attr('size',60);
-					break;
 				case 'range':
 					input.attr('type', 'range');
 					if(words[1]) input.attr('min', parseInt(words[1]));
@@ -86,6 +113,10 @@ $(document).ready(function(){
 					input.attr('type', 'number').attr('size',5);
 					if(words[1]) input.attr('min', parseInt(words[1]));
 					if(words[2]) input.attr('max', parseInt(words[2]));
+					break;
+				//case 'text':
+				default:
+					input.attr('type', 'text').attr('size',40);
 					break;
 				}
 				div.append(input);
@@ -104,6 +135,50 @@ $(document).ready(function(){
 					btn.on('click', onBtnClicked);
 				}
 				
+			} else if( typeof v === 'object' ) {
+				btn = $('<button>').text(k).attr('id', k).addClass('cmd');
+				$('#cmds').append(btn);
+				
+				var dlg = $('<div>').attr('id',k).addClass('dialog');
+				$('body').append(dlg);
+				dlg.hide();
+				
+				var dlgheader = $('<div>').addClass('dlgheader');
+				dlg.append(dlgheader);
+				dlgheader.append($('<span>').text(k));
+				var X = $('<button>').text('X').attr('X', k).addClass('cmd');
+				dlgheader.append(X);
+				for(var j in v) {
+					words = v[j].split(',');
+					label = $('<label>').attr('for', j).text(j+':').addClass('cmd');
+					input = $('<input>').attr('id', j).addClass(k).addClass('cmd');
+					switch(words[0]) {
+					case 'range':
+						input.attr('type', 'range');
+						if(words[1]) input.attr('min', parseInt(words[1]));
+						if(words[2]) input.attr('max', parseInt(words[2]));
+						break;
+					case 'number':
+						input.attr('type', 'number').attr('size',5);
+						if(words[1]) input.attr('min', parseInt(words[1]));
+						if(words[2]) input.attr('max', parseInt(words[2]));
+						break;
+					//case 'text':
+					default:
+						input.attr('type', 'text').attr('size',40);
+						break;
+					}
+					dlg.append(label).append(input).append('<br/>');
+				}
+				var dlgfooter = $('<div>').addClass('dlgfooter');
+				dlg.append(dlgfooter);
+				var OK = $('<button>').text('OK').attr('OK', k).addClass('cmd');
+				dlgfooter.append(OK);
+				
+				btn.on('click', onDialogBtnClicked);
+				OK.on('click', onDialogOKClicked);
+				X.on('click', onDialogXClicked);
+
 			} else {
 				
 			}
@@ -227,10 +302,14 @@ $(document).ready(function(){
 });
 
 function login(u, p) {
-	client.login(u, p, function(err,ret){
+	client.rpc('login', {
+		uid: u,
+		passwd: p
+	}, function(err,ret){
 		//console.log(err, ret);
 		if(err) {
 			echo(ret);
+			socket.emit('hello', {});
 		} else {
 			localStorage.setItem('x_userid', u);
 			localStorage.setItem('x_passwd', p);
@@ -347,7 +426,7 @@ function execCmd() {
 		$('#messages').empty();
 		break;
 	case 'signup':
-		client.signup({
+		client.rpc('signup', {
 			uid: words[1],
 			passwd: words[2]
 		}, function(err,ret){
@@ -364,7 +443,7 @@ function execCmd() {
 		login(words[1], words[2]);
 		break;
 	case 'logout':
-		client.logout(echo2);
+		client.rpc('logout', 0, echo2);
 		break;
 	case 'games':
 		list_games();
@@ -423,6 +502,7 @@ function Client( socket ) {
 	this.profile = {};
 	this.events = {};
 	this.room = null;
+	this.cmds = {};
 	
 	this.setUplink( socket );
 }
@@ -476,6 +556,9 @@ Client.prototype.setUplink = function(socket) {
 		});
 	}
 	
+	this.uid = ++ socket.rpc_seq;
+	socket.gamers[ this.uid ] = this;
+	
 	return this;
 };
 
@@ -506,6 +589,23 @@ Client.prototype.onPush = function(event, args) {
 	case 'say':
 		args.who = this.room.gamers[ args.uid ];
 		break;
+	case 'prompt':
+		for(var i in args) {
+			if(args[i] !== null) this.cmds[i] = 1;
+		}
+		var login = args.login;
+		var signup = args.signup;
+		if(login) {
+			for(i in this.cmds) {
+				args[i] = null;
+			}
+			args.login = login;
+			if(signup) args.signup = signup;
+		}
+		for(i in this.cmds){
+			if(this.cmds[i] === null) delete this.cmds[i];
+		}
+		break;
 	}
 	
 	var func;
@@ -517,9 +617,10 @@ Client.prototype.onPush = function(event, args) {
 	
 	switch(event) {
 	case 'disconnect':
-		this.uid = null;
 		this.pin = null;
 		this.profile = {};
+		this.room = null;
+		this.cmds = {};
 		break;
 	}
 };
@@ -535,96 +636,12 @@ Client.prototype.removeUplink = function() {
 	return this;
 };
 
-// args: { uid, name, passwd, email, phone, uuid }
-Client.prototype.signup = function login( args, func ) {
-	if(typeof func !== 'function') {
-		throw 'need a callback func(err,ret)';
-	}
-	
-	var socket = this.uplink;
-	if(socket.log_traffic) console.log('signup', args);
-	
-	var callback = {
-		seq: ++ socket.rpc_seq,
-		func: func,
-		t: (new Date()).getTime()
-	};
-	socket.rpc_callbacks[ callback.seq ] = callback;
-	
-	args.seq = callback.seq;
-	socket.emit('signup', args);
-};
-
-Client.prototype.login = function login( uid, passwd, func ) {
-	if(typeof func !== 'function') {
-		throw 'need a callback func(err,ret)';
-	}
-	
-	var socket = this.uplink;
-	if(socket.log_traffic) console.log('login', uid, passwd);
-	
-	var client = this;
-	
-	var callback = {
-		seq: ++ socket.rpc_seq,
-		func: function(err, ret){
-			if(! err) {
-				client.uid = ret.token.uid;
-				client.pin = ret.token.pin;
-				client.profile = ret.profile;
-				
-				socket.gamers[ client.uid ] = client;
-			}
-			func(err, ret);
-		},
-		t: (new Date()).getTime()
-	};
-	socket.rpc_callbacks[ callback.seq ] = callback;
-	
-	socket.emit('login', {
-		seq: callback.seq,
-		uid: uid,
-		passwd: passwd
-	});
-};
-
-Client.prototype.logout = function logout( func ) {
-	if(typeof func !== 'function') {
-		throw 'need a callback func(err,ret)';
-	}
-
-	if(! this.uid) {
-		func(400, 'need login first');
-		return;
-	}
-	
-	var socket = this.uplink;
-	if(socket.log_traffic) console.log('logout');
-	
-	var client = this;
-	var callback = {
-		seq: ++ socket.rpc_seq,
-		func: function(err, ret){
-			if(! err) {
-				client.uid = null;
-				client.pin = null;
-				client.profile = {};
-			}
-			func(err, ret);
-		},
-		t: (new Date()).getTime()
-	};
-	socket.rpc_callbacks[ callback.seq ] = callback;
-	
-	socket.emit('logout', {
-		seq: callback.seq,
-		uid: client.uid,
-		pin: client.pin
-	});
-};
-
 /*
  * accepted methods and args:
+ * 
+ * signup, {uid, passwd, name, email, phone, uuid}
+ * login, {uid, passwd}
+ * logout, 0
  * 
  * games, 0
  * rooms, gameid
@@ -647,22 +664,54 @@ Client.prototype.logout = function logout( func ) {
  */
 
 Client.prototype.rpc = function(method, args, func) {
+	var client = this;
+	var socket = client.uplink;
+	if(socket.log_traffic) console.log('rpc', method, args);
+	
 	if(typeof func !== 'function') {
 		throw 'need a callback func(err,ret)';
 	}
 
-	if(! this.uid) {
-		func(400, 'need login first');
-		return;
+	var callback_func = null;
+	
+	switch(method) {
+	case 'login':
+		callback_func = function(err, ret){
+			if(! err) {
+				if(client.uid !== ret.token.uid) {
+					delete socket.gamers[ client.uid ];
+				}
+				
+				client.uid = ret.token.uid;
+				client.pin = ret.token.pin;
+				client.profile = ret.profile;
+				
+				socket.gamers[ client.uid ] = client;
+			}
+			func(err, ret);
+		};
+		break;
+	case 'logout':
+		callback_func = function(err, ret){
+			if(! err) {
+				client.uid = null;
+				client.pin = null;
+				client.profile = {};
+			}
+			func(err, ret);
+		};
+		break;
+	default:
+		if(! client.pin) {
+			func(400, 'need login first');
+			return;
+		}
+		callback_func = func;
 	}
 	
-	var socket = this.uplink;
-	if(socket.log_traffic) console.log('rpc', method, args);
-	
-	var client = this;
 	var callback = {
 			seq: ++ socket.rpc_seq,
-			func: func,
+			func: callback_func,
 			t: (new Date()).getTime()
 		};
 	socket.rpc_callbacks[ callback.seq ] = callback;
