@@ -14,6 +14,7 @@ describe("A suite for javascript", function() {
 	});
 	
 	it('test time', function() {
+		console.log('test time', Date.now());
 		console.log('test time', new Date().getTime());
 		console.log('test time', (new Date()).getTime());
 	});
@@ -29,8 +30,8 @@ describe("A suite for javascript", function() {
 	it('test object', function() {
 		expect(! {}).toBe(false);
 		
-		console.log( typeof {} );
-		console.log( Object.prototype.toString.call( {} ) );
+		expect( typeof {} ).toBe('object');
+		expect( Object.prototype.toString.call( {} ) ).toBe('[object Object]');
 		
 		var b = {
 			a: 10,

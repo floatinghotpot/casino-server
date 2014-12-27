@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node bin/casino-server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "gulp unit-test"
   },
   "repository": {
     "type": "git",
@@ -39,6 +39,7 @@
     "gulp-uglify": "^1.0.2",
     "browserify": "^7.0.0",
     "browser-sync": "^1.7.2",
-    "redis": "^0.12.1"
+    "redis": "^0.12.1",
+    "read": "^1.0.5"
   }
 }

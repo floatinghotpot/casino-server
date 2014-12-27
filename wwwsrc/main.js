@@ -8,7 +8,6 @@ var client = null;
 $(document).ready(function(){
 	var socket = io();
 	
-	//console.log(socket);
 	socket.log_traffic = true;
 	
 	client = new Client(socket);
@@ -28,161 +27,7 @@ $(document).ready(function(){
 		}, 1000);
 	});
 
-	/*
-	 * cmds {
-	 *     exit: true,
-	 *     takeseat: true,
-	 *     unseat: true,
-	 *     followchip: true,
-	 *     addchip: [50,100,150],
-	 *     addchip: 'range,0,1000000',
-	 *     giveup: true,
-	 *     pk: ['zhang3', 'li4', 'wang5'],
-	 *     checkcard: true,
-	 *     showcard: true,
-	 *   }
-	 */
-	function onBtnClicked(e) {
-		var method = $(this).attr('id');
-		client.rpc(method, $(this).attr('arg'), echoOnErr);
-	}
-	function onInputBtnClicked(e){
-		var method = $(this).attr('id');
-		client.rpc(method, $('input#'+method).val(), echoOnErr);
-		$('input#'+method).val('');
-	}
-	function onInputBoxEnter(e) {
-		if(e.which == 13) onInputBtnClicked.call(this, e);
-	}
-	function onDialogBtnClicked(e) {
-		var method = $(this).attr('id');
-		var dlg = $('div#'+method);
-		var x = ($(window).width() - dlg.width()) / 2;
-		var y = ($(window).height() - dlg.height()) / 2;
-		dlg.show();
-		dlg.css({ 
-			position:'absolute',
-			left: x + 'px', 
-			top: y + 'px'
-		});
-		
-		$(this).hide();
-	}
-	function onDialogXClicked(e) {
-		var method = $(this).attr('X');
-		$('div#'+method).hide();
-		$('button#'+method).show();
-	}
-	function onDialogOKClicked(e) {
-		var method = $(this).attr('OK');
-		var args = {};
-		$('input.' + method).each(function(i, v){
-			var input = $(this);
-			args[ input.attr('id') ] = input.val();
-		});
-		client.rpc(method, args, echoOnErr);
-	}
-	client.on('prompt', function(cmds){
-		console.log('prompt', cmds);
-		
-		var v, div, btn, words, label, input;
-		for(var k in cmds) {
-			v = cmds[ k ];
-			if(v === null) {
-				$('div#'+k).remove();
-				$('button#'+k).remove();
-				
-			} else if(v === true) {
-				btn = $('<button>').text(k).attr('id', k).attr('arg', 0).addClass('cmd');
-				$('#cmds').append(btn);
-				btn.on('click', onBtnClicked);
-				
-			} else if(typeof v === 'string') {
-				div = $('<div>').attr('id',k).addClass('cmd');
-				$('#cmds').append(div);
-				input = $('<input>').attr('id', k).addClass('cmd');
-				words = v.split(',');
-				switch(words[0]) {
-				case 'range':
-					input.attr('type', 'range');
-					if(words[1]) input.attr('min', parseInt(words[1]));
-					if(words[2]) input.attr('max', parseInt(words[2]));
-					break;
-				case 'number':
-					input.attr('type', 'number').attr('size',5);
-					if(words[1]) input.attr('min', parseInt(words[1]));
-					if(words[2]) input.attr('max', parseInt(words[2]));
-					break;
-				//case 'text':
-				default:
-					input.attr('type', 'text').attr('size',40);
-					break;
-				}
-				div.append(input);
-				btn = $('<button>').text(k).attr('id', k).addClass('cmd');
-				div.append(btn);
-				btn.on('click', onInputBtnClicked);
-				input.keydown(onInputBoxEnter);
-				
-			} else if( Object.prototype.toString.call( v ) === '[object Array]' ) {
-				div = $('<div>').attr('id',k).addClass('cmd');
-				$('#cmds').append(div);
-				for(var i=0; i<v.length; i++) {
-					var arg = v[i];
-					btn = $('<button>').text(k+' '+arg).attr('id', k).attr('arg', arg).addClass('cmd');
-					div.append(btn);
-					btn.on('click', onBtnClicked);
-				}
-				
-			} else if( typeof v === 'object' ) {
-				btn = $('<button>').text(k).attr('id', k).addClass('cmd');
-				$('#cmds').append(btn);
-				
-				var dlg = $('<div>').attr('id',k).addClass('dialog');
-				$('body').append(dlg);
-				dlg.hide();
-				
-				var dlgheader = $('<div>').addClass('dlgheader');
-				dlg.append(dlgheader);
-				dlgheader.append($('<span>').text(k));
-				var X = $('<button>').text('X').attr('X', k).addClass('cmd');
-				dlgheader.append(X);
-				for(var j in v) {
-					words = v[j].split(',');
-					label = $('<label>').attr('for', j).text(j+':').addClass('cmd');
-					input = $('<input>').attr('id', j).addClass(k).addClass('cmd');
-					switch(words[0]) {
-					case 'range':
-						input.attr('type', 'range');
-						if(words[1]) input.attr('min', parseInt(words[1]));
-						if(words[2]) input.attr('max', parseInt(words[2]));
-						break;
-					case 'number':
-						input.attr('type', 'number').attr('size',5);
-						if(words[1]) input.attr('min', parseInt(words[1]));
-						if(words[2]) input.attr('max', parseInt(words[2]));
-						break;
-					//case 'text':
-					default:
-						input.attr('type', 'text').attr('size',40);
-						break;
-					}
-					dlg.append(label).append(input).append('<br/>');
-				}
-				var dlgfooter = $('<div>').addClass('dlgfooter');
-				dlg.append(dlgfooter);
-				var OK = $('<button>').text('OK').attr('OK', k).addClass('cmd');
-				dlgfooter.append(OK);
-				
-				btn.on('click', onDialogBtnClicked);
-				OK.on('click', onDialogOKClicked);
-				X.on('click', onDialogXClicked);
-
-			} else {
-				
-			}
-		}
-	});
+	client.on('prompt', updateCmds);
 	
 	client.on('shout', function(ret){
 		addMsg(ret.who.name + ' shout: ' + ret.msg);
@@ -289,7 +134,7 @@ $(document).ready(function(){
 		addMsg( 'game over! ' + ret.uid + ' at ' + ret.seat + ' win ' + ret.prize);
 	});
 
-	client.on('disconnect', function(ret){
+	client.on('bye', function(ret){
 		addMsg(ret);
 	});
 
@@ -300,19 +145,214 @@ $(document).ready(function(){
 	});
 });
 
+/*
+ * cmds {
+ *     exit: true,
+ *     takeseat: true,
+ *     unseat: true,
+ *     followchip: true,
+ *     addchip: [50,100,150],
+ *     addchip: 'range,0,1000000',
+ *     giveup: true,
+ *     pk: ['zhang3', 'li4', 'wang5'],
+ *     checkcard: true,
+ *     showcard: true,
+ *   }
+ */
+function parseSignUpReply(err,ret){
+	parseReply(err,ret);
+	if(! err) {
+		addMsg('account created: ' + ret.uid + '/' + ret.passwd);
+		login(ret.uid, ret.passwd);
+	}
+}
+
+function onBtnClicked(e) {
+	var method = $(this).attr('id');
+	switch(method) {
+	case 'fastsignup':
+		client.rpc(method, $(this).attr('arg'), parseSignUpReply);
+		break;
+	default:
+		client.rpc(method, $(this).attr('arg'), parseReply);
+	}
+}
+function onInputBtnClicked(e){
+	var method = $(this).attr('id');
+	client.rpc(method, $('input#'+method).val(), parseReply);
+	$('input#'+method).val('');
+}
+function onInputBoxEnter(e) {
+	if(e.which == 13) onInputBtnClicked.call(this, e);
+}
+function onDialogBtnClicked(e) {
+	var method = $(this).attr('id');
+	var dlg = $('div#'+method);
+	var x = ($(window).width() - dlg.width()) / 2;
+	var y = ($(window).height() - dlg.height()) / 2;
+	dlg.show();
+	dlg.css({ 
+		position:'absolute',
+		left: x + 'px', 
+		top: y + 'px'
+	});
+	
+	$(this).hide();
+}
+function onDialogXClicked(e) {
+	var method = $(this).attr('X');
+	$('div#'+method).hide();
+	$('button#'+method).show();
+}
+function onDialogOKClicked(e) {
+	var method = $(this).attr('OK');
+	var args = {};
+	$('input.' + method).each(function(i, v){
+		var input = $(this);
+		args[ input.attr('id') ] = input.val();
+	});
+	switch(method) {
+	case 'signup':
+		client.rpc(method, args, parseSignUpReply);
+		break;
+	default:
+		client.rpc(method, args, parseReply);
+	}
+}
+
+function updateCmds( cmds ){
+	var v, div, btn, words, label, input;
+	for(var k in cmds) {
+		v = cmds[ k ];
+		if(v === null) {
+			$('div#'+k).remove();
+			$('button#'+k).remove();
+			
+		} else if(v === true) {
+			btn = $('<button>').text(k).attr('id', k).attr('arg', 0).addClass('cmd');
+			$('#cmds').append(btn);
+			btn.on('click', onBtnClicked);
+			
+		} else if(typeof v === 'string') {
+			div = $('<div>').attr('id',k).addClass('cmd');
+			$('#cmds').append(div);
+			input = $('<input>').attr('id', k).addClass('cmd');
+			words = v.split(',');
+			switch(words[0]) {
+			case 'range':
+				input.attr('type', 'range');
+				if(words[1]) input.attr('min', parseInt(words[1]));
+				if(words[2]) input.attr('max', parseInt(words[2]));
+				break;
+			case 'number':
+				input.attr('type', 'number').attr('size',5);
+				if(words[1]) input.attr('min', parseInt(words[1]));
+				if(words[2]) input.attr('max', parseInt(words[2]));
+				break;
+			case 'password':
+				input.attr('type', 'password').attr('size',40);
+				break;
+			//case 'text':
+			default:
+				input.attr('type', 'text').attr('size',40);
+				break;
+			}
+			div.append(input);
+			btn = $('<button>').text(k).attr('id', k).addClass('cmd');
+			div.append(btn);
+			btn.on('click', onInputBtnClicked);
+			input.keydown(onInputBoxEnter);
+			
+		} else if( Object.prototype.toString.call( v ) === '[object Array]' ) {
+			div = $('<div>').attr('id',k).addClass('cmd');
+			$('#cmds').append(div);
+			for(var i=0; i<v.length; i++) {
+				var arg = v[i];
+				btn = $('<button>').text(k+' '+arg).attr('id', k).attr('arg', arg).addClass('cmd');
+				div.append(btn);
+				btn.on('click', onBtnClicked);
+			}
+			
+		} else if( typeof v === 'object' ) {
+			btn = $('<button>').text(k).attr('id', k).addClass('cmd');
+			$('#cmds').append(btn);
+			
+			var dlg = $('<div>').attr('id',k).addClass('dialog');
+			$('body').append(dlg);
+			dlg.hide();
+			
+			var dlgheader = $('<div>').addClass('dlgheader');
+			dlg.append(dlgheader);
+			dlgheader.append($('<span>').text(k));
+			var X = $('<button>').text('X').attr('X', k).addClass('cmd');
+			dlgheader.append(X);
+			for(var j in v) {
+				label = $('<label>').attr('for', j).text(j+':').addClass('cmd');
+				input = $('<input>').attr('id', j).addClass(k).addClass('cmd');
+				
+				words = v[j].split(',');
+				switch(words[0]) {
+				case 'range':
+					input.attr('type', 'range');
+					if(words[1]) input.attr('min', parseInt(words[1]));
+					if(words[2]) input.attr('max', parseInt(words[2]));
+					break;
+				case 'number':
+					input.attr('type', 'number').attr('size',5);
+					if(words[1]) input.attr('min', parseInt(words[1]));
+					if(words[2]) input.attr('max', parseInt(words[2]));
+					break;
+				case 'password':
+					input.attr('type', 'password').attr('size',40);
+					break;
+				//case 'text':
+				default:
+					input.attr('type', 'text').attr('size',40);
+					break;
+				}
+				
+				switch(j) { // auto fill if we remember uid & passwd
+				case 'uid':
+					var u = localStorage.getItem('x_userid');
+					if(u) input.val(u);
+					break;
+				case 'passwd':
+					var p = localStorage.getItem('x_passwd');
+					if(p) input.val(p);
+					break;
+				}
+				
+				dlg.append(label).append(input).append('<br/>');
+			}
+			var dlgfooter = $('<div>').addClass('dlgfooter');
+			dlg.append(dlgfooter);
+			var OK = $('<button>').text('OK').attr('OK', k).addClass('cmd');
+			dlgfooter.append(OK);
+			
+			btn.on('click', onDialogBtnClicked);
+			OK.on('click', onDialogOKClicked);
+			X.on('click', onDialogXClicked);
+
+		} else {
+			
+		}
+	}
+}
+
 function login(u, p) {
 	client.rpc('login', {
 		uid: u,
 		passwd: p
 	}, function(err,ret){
-		//console.log(err, ret);
 		if(err) {
 			echo(ret);
 			socket.emit('hello', {});
 		} else {
 			localStorage.setItem('x_userid', u);
 			localStorage.setItem('x_passwd', p);
-			addMsg('hi ' + ret.profile.name + ', login success, sid:' + ret.token.sid);
+			addMsg(ret.token.uid + ' (' + ret.profile.name + ') login success');
+			
+			if(ret.cmds) updateCmds(ret.cmds);
 			
 			list_games();
 		}
@@ -372,12 +412,13 @@ function echo(ret) {
 	addMsg( JSON.stringify(ret) );
 }
 
-function echo2(err, ret) {
+function echoReply(err, ret) {
 	addMsg( JSON.stringify(ret) );
 }
 
-function echoOnErr(err, ret) {
+function parseReply(err, ret) {
 	if(err) addMsg(ret);
+	else if(ret.cmds) updateCmds(ret.cmds);
 }
 
 function showRoom(room) {
@@ -393,7 +434,6 @@ function showRoom(room) {
 	var gamers = room.gamers;
 	var seats = room.seats;
 	var cards = room.cards;
-	console.log('cards:', cards);
 	$('#seats').append($('<li>').text('gamers:' + Object.keys(gamers).join(', ')));
 	for(var i=0, len=seats.length; i<len; i++) {
 		var uid = seats[i];
@@ -424,25 +464,20 @@ function execCmd() {
 		$('#seats').empty();
 		$('#messages').empty();
 		break;
+	case 'fastsignup':
+		client.rpc('fastsignup', 0, parseSignUpReply);
+		break;
 	case 'signup':
 		client.rpc('signup', {
 			uid: words[1],
 			passwd: words[2]
-		}, function(err,ret){
-			if(err) {
-				echo(ret);
-			} else {
-				echo(ret);
-				localStorage.setItem('x_userid', uid);
-				localStorage.setItem('x_passwd', passwd);
-			}
-		});
+		}, parseSignUpReply);
 		break;
 	case 'login':
 		login(words[1], words[2]);
 		break;
 	case 'logout':
-		client.rpc('logout', 0, echo2);
+		client.rpc('logout', 0, parseReply);
 		break;
 	case 'games':
 		list_games();
@@ -451,10 +486,10 @@ function execCmd() {
 		list_rooms( words[1] );
 		break;
 	case 'entergame':
-		client.rpc('entergame', words[1], echoOnErr);
+		client.rpc('entergame', words[1], parseReply);
 		break;
 	case 'enter':
-		client.rpc('enter', words[1], echoOnErr);
+		client.rpc('enter', words[1], parseReply);
 		break;
 	case 'look':
 		client.rpc('look', 0, function(err, ret){
@@ -474,20 +509,20 @@ function execCmd() {
 		});
 		break;
 	case 'takeseat':
-		client.rpc('takeseat', words[1], echoOnErr);
+		client.rpc('takeseat', words[1], parseReply);
 		break;
 	case 'unseat':
-		client.rpc('unseat', 0, echoOnErr);
+		client.rpc('unseat', 0, parseReply);
 		break;
 	case 'shout':
 		words.shift();
-		client.rpc('shout', 0, words.join(' '));
+		client.rpc('shout', words.join(' '), parseReply );
 		break;
 	case 'say':
 		words.shift();
-		client.rpc('sat', words.join(' '), echoOnErr );
+		client.rpc('say', words.join(' '), parseReply );
 		break;
 	default:
-		//client.say( cmd, echoOnErr );
+		//client.say( cmd, parseReply );
 	}
 }

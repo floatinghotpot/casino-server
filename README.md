@@ -9,10 +9,12 @@ Game rules supported:
 - [ ] Blackjack (21点)
 
 Features: 
-- [x] Scalable: using redis as message bus and data storage.
+- [x] Cross-platform: powered by node.js, easy to deploy on varios platforms.
+- [x] Scalable: using Redis as message bus and data storage.
+- [x] Open architecture: with Redis as the message bus, easy to interact and extend.
 - [x] Cluster: using node.js cluster, sticky session, and socket.io-redis.
 - [x] Load balancing: using NginX as load balancer.
-- [x] Cross-platform: come with a web interface to test websocket features.
+- [x] WebSocket protocol: come with javascript client API and web-based demo. API in other languages to be implemented.
 
 # Architecture #
 
@@ -69,5 +71,23 @@ open http://localhost:7000/
 -a Address to use (defaults to 0.0.0.0)
 
 -r Address of Redis server (defaults to 127.0.0.1:6379)
+
+# Tools #
+
+With Redis as the message bus, it's very easy for tools to work with the open architecture.
+
+## Event Logger ##
+
+Start the event logger to monitor the events:
+
+```bash
+bin/logger.js
+```
+
+Or, log the events into log file:
+
+```bash
+bin/logger.js -o ./tmp/casino.log
+```
 
 
