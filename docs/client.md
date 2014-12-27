@@ -128,7 +128,6 @@ socket.emit('rpc', {
 	pin: 0,
 	f: 'signup', // method
 	args: {
-		seq: callback.seq,
 		uid: 'xxx',
 		passwd: 'xxx',
 		name: 'xxx',
@@ -155,6 +154,8 @@ socket.emit('rpc_ret', {
 ```
 
 ### fastsignup ###
+
+For lazy user, account can be created without input, server side can automatically generate a user id and password.
 
 * Request:
 
@@ -222,7 +223,7 @@ socket.emit('rpc_ret', {
 			exp: n,
 			level: n
 		},
-		cmds : { // available commands
+		cmds : { // commands after login, client should display logout, but remove signup and login.
 			fastsignup: null,
 			signup: null,
 			login: null,
@@ -241,7 +242,6 @@ The uid and pin will be used for all later API call.
 ```javascript
 socket.emit('rpc', {
 	seq: callback.seq,
-	seq: callback.seq,
 	uid: 'xxx',
 	pin: 'xxx'
 	f: 'logout', // method
@@ -255,7 +255,7 @@ Success:
 
 ```javascript
 socket.emit('rpc_ret', { 
-	seq: args.seq, 
+	seq: req.seq, 
 	err: 0, 
 	ret: {
 		cmds: { // available commands
@@ -279,7 +279,7 @@ socket.emit('rpc_ret', {
 });
 ```
 
-### Hall RPC ###
+### RPC Of Hall ###
 
 The following methods can be called after login.
 
@@ -289,7 +289,19 @@ The following methods can be called after login.
 * rooms, gameid
 * enter, roomid
 
-### Room RPC ###
+For example:
+
+```javascript
+socket.emit('rpc', {
+	seq: callback.seq,
+	uid: 'xxx',
+	pin: 'xxx'
+	f: 'shout', // method
+	args: 'xxx'	// message text
+});
+```
+
+### RPC Of Room ###
 
 The following method can be called after enter room.
 
@@ -299,7 +311,7 @@ The following method can be called after enter room.
 * look
 * exit
 
-### Jinhua Game RPC ###
+### RPC Of Jinhua Game ###
 
 * ready
 * follow
@@ -311,5 +323,5 @@ The following method can be called after enter room.
 
 ### Other RPC ###
 
-More methods can be defined in each game.
+More RPC methods can be defined in each game.
 
