@@ -73,7 +73,16 @@ $(document).ready(function(){
 	client.on('deal', function(ret){
 		addMsg('dealing cards ...');
 		
+		var gamers = client.room.gamers;
+		var seats = client.room.seats;
+		
 		var deals = ret.deals;
+		var inseats = ret.seats;
+		for(var i=0; i<inseats.length; i++) {
+			var gamer = gamers[ seats[ inseats[i] ] ];
+			gamer.coins -= ret.chip;
+		}
+		
 		var room_cards = client.room.cards = {};
 		var room_chips = client.room.chips = {};
 		var item, seat, cards;
@@ -109,10 +118,22 @@ $(document).ready(function(){
 	
 	client.on('follow', function(ret){
 		addMsg( ret.uid + ' at ' + ret.seat + ' follow ' + ret.chip);
+		
+		var gamers = client.room.gamers;
+		if(ret.uid in gamers) {
+			gamers[ ret.uid ].coins -= ret.chip;
+		}
+		showRoom(client.room);
 	});
 
 	client.on('addchip', function(ret){
 		addMsg( ret.uid + ' at ' + ret.seat + ' addchip ' + ret.chip);
+		
+		var gamers = client.room.gamers;
+		if(ret.uid in gamers) {
+			gamers[ ret.uid ].coins -= ret.chip;
+		}
+		showRoom(client.room);
 	});
 
 	client.on('pk', function(ret){
@@ -136,7 +157,14 @@ $(document).ready(function(){
 	});
 	
 	client.on('gameover', function(ret){
-		addMsg( 'game over! ' + ret.uid + ' at ' + ret.seat + ' win ' + ret.prize);
+		var prize = ret.prize - ret.chips[ ret.seat ];
+		addMsg( 'game over! ' + ret.uid + ' at ' + ret.seat + ' win ' + prize + ' !!');
+		
+		var gamers = client.room.gamers;
+		if(ret.uid in gamers) {
+			gamers[ ret.uid ].coins += ret.prize;
+		}
+		showRoom(client.room);
 	});
 
 	client.on('bye', function(ret){
@@ -763,7 +791,7 @@ Client.prototype.rpc = function(method, args, func) {
 	var callback = {
 			seq: ++ socket.rpc_seq,
 			func: callback_func,
-			t: (new Date()).getTime()
+			t: Date.now()
 		};
 	socket.rpc_callbacks[ callback.seq ] = callback;
 	

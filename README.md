@@ -51,9 +51,9 @@ forever start casino-server
 * Installing as a node app, and run in current folder:
 
 ```bash
-mkdir myapp
-cd myapp/
-npm install casino-server
+git clone https://github.com/floatinghotpot/casino-server.git casino
+cd casino
+npm install
 node bin/casino-server [options]
 ```
 

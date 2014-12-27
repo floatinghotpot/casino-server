@@ -1,6 +1,6 @@
 {
   "name": "casino-server",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "An online poker game server powered by node.js and socket.io",
   "main": "index.js",
   "scripts": {

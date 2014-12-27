@@ -14,9 +14,7 @@ describe("A suite for javascript", function() {
 	});
 	
 	it('test time', function() {
-		console.log('test time', Date.now());
-		console.log('test time', new Date().getTime());
-		console.log('test time', (new Date()).getTime());
+		expect(new Date().getTime()).toBe(Date.now());
 	});
 	
 	it('test array operation', function() {

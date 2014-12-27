@@ -27,8 +27,8 @@ describe("A suite for redis", function() {
 	});
 	
 	it('test string', function(done){
-		r.set('str_key1', 'hello');
-		r.get('str_key1', function(err,ret){
+		r.set('test_str_key1', 'hello');
+		r.get('test_str_key1', function(err,ret){
 			expect(ret).toBe('hello');
 			done();
 		});
@@ -39,37 +39,37 @@ describe("A suite for redis", function() {
 	});
 
 	it('test set', function(done){
-		r.sadd('myset', 'one', function(err,ret){
+		r.sadd('test_myset', 'one', function(err,ret){
 		});
-		r.sismember('myset', 'one', function(err,ret){
+		r.sismember('test_myset', 'one', function(err,ret){
 			expect(ret).toBe(1);
 			done();
 		});
 	});
 	
 	it('test set', function(done){
-		r.smembers('myset', function(err,ret){
+		r.smembers('test_myset', function(err,ret){
 			expect(ret.indexOf('one') >= 0).toBe(true);
 			done();
 		});
 	});
 
 	it('test hash', function(done){
-		r.hset('hash_key1', 'name', 'zhang3');
-		r.hset('hash_key1', 'age', 20);
-		r.hkeys('hash_key1', function(err,keys){
+		r.hset('test_hash_key1', 'name', 'zhang3');
+		r.hset('test_hash_key1', 'age', 20);
+		r.hkeys('test_hash_key1', function(err,keys){
 			console.log('test hkeys:', err, keys);
 		});
-		r.hget('hash_key1', 'name', function(err,ret){
+		r.hget('test_hash_key1', 'name', function(err,ret){
 			expect(ret).toBe('zhang3');
 			done();
 		});
-		r.hset('hash_key2', 'name', 'li4');
-		r.hset('hash_key2', 'age', 30);
+		r.hset('test_hash_key2', 'name', 'li4');
+		r.hset('test_hash_key2', 'age', 30);
 	});
 	
 	it('test hash', function(done){
-		r.hgetall('hash_key2', function(err,ret){
+		r.hgetall('test_hash_key2', function(err,ret){
 			console.log('test hgetall:', err, ret);
 			//console.log(typeof ret.age);
 			done();
@@ -148,7 +148,7 @@ describe("A suite for redis", function() {
 	});
 
 	it('test script with LUA script', function(done){
-		var lua_script = "local keys = redis.call('keys','hash_key*')\n" +
+		var lua_script = "local keys = redis.call('keys','test_hash_key*')\n" +
 		"local data = {}\n" +
 		"local res = {}\n" +
 		"for i=1, #keys do\n" +
@@ -161,18 +161,6 @@ describe("A suite for redis", function() {
 			//expect(ret).toBe(55);
 			done();
 		});
-	});
-	
-	it('test present value', function(){
-		var monthly_roi = 0.04 / 12;
-		function present_value_of_monthly_pay(per, n) {
-			if(n == 1) return per;
-			else return (per + present_value_of_monthly_pay(per, n-1)) * (1 + monthly_roi);
-		}
-		function monthly_to_onetime(per, n) {
-			return present_value_of_monthly_pay(per, n) / Math.pow(1 + monthly_roi, n);
-		}
-		console.log( 'monthly pay to current value:', monthly_to_onetime(300, 24) );
 	});
 });
 
