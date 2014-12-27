@@ -15,17 +15,17 @@ casino id: number
 "casino:c_xxx:t_xxx:rooms" (set) -> {
 }
 
-## master maintained ##
+## group maintained ##
 
-enumrate keys "casino:s_xxx", if id == self.id, then it's the master
+The sorted set are scored and updated in tick(), and outdated members can be removed in tick().
 
-master will maintain following data
-
-"casino:all" (set) -> [ id, id, ... ]
+"casino:all" (sorted set) -> [ id, id, ... ]
 
 "game:all" (set) -> [ typeid, typeid, ... ]
 
-"game:rooms:#xxx" (sorted set) -> [ roomid, roomid, ... ]
+"game:#xxx:rooms" (sorted set) -> [ roomid, roomid, ... ]
+
+"room:all" (sorted set) -> [ roomid, roomid, ... ]
 
 ## game type table ##
 
@@ -43,6 +43,7 @@ room id format: r + number, for example: r1001, r1002, r1003
 
 ```javascript
 'room:seq' (serial), counter for room
+
 'room:#xxx' (hash map) -> {
 	id: 'rxxx',
 	type: 'xxx',
@@ -54,5 +55,6 @@ room id format: r + number, for example: r1001, r1002, r1003
 	seat_0: 'xxx',	// gamer uid
 	seat_1: 'xxx'
 }
+
 ```
 
