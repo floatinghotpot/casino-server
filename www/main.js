@@ -38,6 +38,10 @@ $(document).ready(function(){
 		showRoom(ret);
 	});
 	
+	client.on('refresh', function(ret){
+		showRoom(client.room);
+	});
+	
 	client.on('enter', function(ret){
 		addMsg(ret.who.name + ' came into room ' + ret.where);
 		showRoom(client.room);
@@ -630,6 +634,9 @@ Client.prototype.filterCmds = function(cmds) {
 
 Client.prototype.onPush = function(event, args) {
 	switch(event) {
+	case 'prompt':
+		this.filterCmds(args);
+		break;
 	case 'look':
 		this.room = args;
 		break;
@@ -650,9 +657,15 @@ Client.prototype.onPush = function(event, args) {
 	case 'say':
 		args.who = this.room.gamers[ args.uid ];
 		break;
-	case 'prompt':
-		this.filterCmds(args);
-		break;
+	case 'refresh':
+		var uid = args.uid;
+		if(uid === this.uid) {
+			this.profile = args.profile;
+		}
+		var room = this.room;
+		if(room && (uid in room.gamers)) {
+			room.gamers[ uid ] = args.profile;
+		}
 	}
 	
 	var func;

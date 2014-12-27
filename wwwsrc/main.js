@@ -37,6 +37,10 @@ $(document).ready(function(){
 		showRoom(ret);
 	});
 	
+	client.on('refresh', function(ret){
+		showRoom(client.room);
+	});
+	
 	client.on('enter', function(ret){
 		addMsg(ret.who.name + ' came into room ' + ret.where);
 		showRoom(client.room);
