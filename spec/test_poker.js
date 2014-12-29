@@ -42,32 +42,5 @@ describe("A suite for data model", function() {
 		Poker.sort(cloned_cards);
 		expect(Poker.compare(cards, cloned_cards)).toBe(0);
 	});
-
-	it('test jinhua poker', function() {
-		var baozi = Poker([ 'SA', 'CA', 'DA' ]);
-		var tonghuashun = Poker([ 'SA', 'SK', 'SQ' ]);
-		var tonghua = Poker([ 'SA', 'S10', 'S8' ]);
-		var shunzi = Poker([ 'SA', 'HK', 'CQ' ]);
-		var duizi = Poker([ 'SA', 'HA', 'C2' ]);
-		var danzhang = Poker([ 'SA', 'H3', 'C7' ]);
-		
-		var duizi_1 = Poker([ 'SA', 'CA', 'DK' ]);
-		var duizi_2 = Poker([ 'CA', 'DA', 'HK' ]);
-
-		expect(Jinhua.pattern(baozi)).toBe(Jinhua.BAOZI);
-		expect(Jinhua.pattern(tonghuashun)).toBe(Jinhua.TONGHUASHUN);
-		expect(Jinhua.pattern(tonghua)).toBe(Jinhua.TONGHUA);
-		expect(Jinhua.pattern(shunzi)).toBe(Jinhua.SHUNZI);
-		expect(Jinhua.pattern(duizi)).toBe(Jinhua.DUIZI);
-		expect(Jinhua.pattern(danzhang)).toBe(Jinhua.DANZHANG);
-
-		expect(Jinhua.compare(baozi, tonghuashun) > 0).toBe(true);
-		expect(Jinhua.compare(tonghuashun, tonghua) > 0).toBe(true);
-		expect(Jinhua.compare(tonghua, shunzi) > 0).toBe(true);
-		expect(Jinhua.compare(shunzi, duizi) > 0).toBe(true);
-		expect(Jinhua.compare(duizi, danzhang) > 0).toBe(true);
-
-		expect(Jinhua.rank(duizi_1) == Jinhua.rank(duizi_2)).toBe(true);
-	});
 });
 
