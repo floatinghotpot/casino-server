@@ -6,7 +6,7 @@ describe("A suite for data model", function() {
 	
 	it('test card', function() {
 		expect(Poker('SA')).toBe(4 << 4 | 14);
-
+		
 		expect(Poker.visualize(Poker('SA'))).toBe('♠A');
 		expect(Poker.visualize(Poker('HA'))).toBe('♥A');
 		expect(Poker.visualize(Poker('CA'))).toBe('♣A');
