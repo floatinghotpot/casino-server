@@ -7,10 +7,10 @@ describe("A suite for data model", function() {
 	it('test card', function() {
 		expect(Poker('SA')).toBe(4 << 4 | 14);
 		
-		expect(Poker.visualize(Poker('SA'))).toBe('♠A');
-		expect(Poker.visualize(Poker('HA'))).toBe('♥A');
-		expect(Poker.visualize(Poker('CA'))).toBe('♣A');
-		expect(Poker.visualize(Poker('D10'))).toBe('♦10');
+		expect(Poker.visualize(Poker('SA'))).toBe('A♠');
+		expect(Poker.visualize(Poker('HA'))).toBe('A♥');
+		expect(Poker.visualize(Poker('CA'))).toBe('A♣');
+		expect(Poker.visualize(Poker('D10'))).toBe('10♦');
 
 		expect(Poker([ 'SA', 'C10' ]).join('')).toBe([ Poker('SA'), Poker('C10') ].join(''));
 	});
@@ -29,6 +29,12 @@ describe("A suite for data model", function() {
 	});
 
 	it('test card set compare/draw/merge/sort', function() {
+		var three_cards = Poker(['SA', 'D10', 'DA']);
+		Poker.sort( three_cards );
+		expect(three_cards[0] & 0xf).toBe(14);
+		expect(three_cards[1] & 0xf).toBe(14);
+		expect(three_cards[2] & 0xf).toBe(10);
+		
 		var cards = Poker.newSet();
 		var cloned_cards = Poker.clone(cards);
 		expect(Poker.compare(cards, cloned_cards)).toBe(0);

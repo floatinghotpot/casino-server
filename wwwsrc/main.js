@@ -136,7 +136,7 @@ $(document).ready(function(){
 	});
 
 	client.on('pk', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' pk ' + ret.pk_uid + ' at ' + ret.pk_uid + ', result: ' + (ret.win?'win':'lost'));
+		addMsg( ret.uid + ' at ' + ret.seat + ' pk ' + ret.pk_uid + ' at ' + ret.pk_seat + ', result: ' + (ret.win?'win':'lost'));
 	});
 	
 	client.on('checkcard', function(ret){
@@ -163,6 +163,8 @@ $(document).ready(function(){
 		if(ret.uid in gamers) {
 			gamers[ ret.uid ].coins += ret.prize;
 		}
+		
+		client.room.cards = ret.cards;
 		showRoom(client.room);
 	});
 

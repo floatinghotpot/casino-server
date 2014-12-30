@@ -137,7 +137,7 @@ $(document).ready(function(){
 	});
 
 	client.on('pk', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' pk ' + ret.pk_uid + ' at ' + ret.pk_uid + ', result: ' + (ret.win?'win':'lost'));
+		addMsg( ret.uid + ' at ' + ret.seat + ' pk ' + ret.pk_uid + ' at ' + ret.pk_seat + ', result: ' + (ret.win?'win':'lost'));
 	});
 	
 	client.on('checkcard', function(ret){
@@ -164,6 +164,8 @@ $(document).ready(function(){
 		if(ret.uid in gamers) {
 			gamers[ ret.uid ].coins += ret.prize;
 		}
+		
+		client.room.cards = ret.cards;
 		showRoom(client.room);
 	});
 
@@ -966,7 +968,7 @@ var POKER_CARDS = {};
 for(var color=1; color<=4; color++) {
 	for(var number=2; number<=14; number++) {
 		var card = (color << 4) | number;
-		POKER_CARDS[ card ] = POKER_COLORS[ color ] + '' + POKER_NUMBERS[ number ];
+		POKER_CARDS[ card ] = POKER_NUMBERS[ number ] + '' + POKER_COLORS[ color ];
 	}
 }
 POKER_CARDS[ RED_JOKER ] = '@';
