@@ -23,20 +23,20 @@ exports = module.exports = {
 		},
 		'jinhua1': {
 			name: 'classic_jinhua',
-			desc: 'jinhua game with classic rules',
+			desc: 'jinhua game, rule: classic',
 			game: 'jinhua_game.js',
 			options: {
 				max_seats: 6,
 				no_joker: true,
-				no_color: [],
 				no_number: [],
 				ready_countdown: 10,
 				turn_countdown: 10,
-				chip_base: 100,
-				chip_min: 100,
-				chip_max: -1,
-				addchip_min: 100,
-				addchip_multiple: false,
+				ante: 50,			// 锅底
+				chip_min: 50,		// 最少投注
+				chip_max: -1,		// 最大投注
+				raise_min: 50,		// 最少加注
+				raise_multiple: false,
+				poll_top: -1,		// 封顶
 				rake: 0.05
 			},
 			min: 2,
@@ -44,42 +44,72 @@ exports = module.exports = {
 		},
 		'jinhua2': {
 			name: 'pk jinhua',
-			desc: 'jinhua game with number>6',
+			desc: 'jinhua game, rule: number>6',
 			game: 'jinhua_game.js',
 			options: {
 				max_seats: 6,
 				no_joker: true,
-				no_color: [],
 				no_number: [2,3,4,5,6],
 				ready_countdown: 10,
 				turn_countdown: 10,
-				chip_base: 500,
+				ante: 500,
 				chip_min: 500,
 				chip_max: -1,
-				addchip_min: 500,
-				addchip_multiple: false,
+				raise_min: 500,
+				raise_multiple: true,	// 以跟注为基础，翻倍加注
+				poll_top: -1,			// 封顶
 				rake: 0.05
 			},
 			min: 2,
 			max: 200
 		},
-		'jinhua3': {
-			name: 'joker jinhua',
-			desc: 'jinhua game with number>6 and magic joker',
-			game: 'jinhua_game.js',
+		'holdem1': {
+			name: 'texas holdem',
+			desc: 'texas holdem, rule: limit texas',
+			game: 'holdem_game.js',
 			options: {
-				max_seats: 6,
-				no_joker: false,
-				no_color: [],
-				no_number: [2,3,4,5,6],
+				max_seats: 10,
+				no_joker: true,
+				no_number: [],
 				ready_countdown: 10,
 				turn_countdown: 10,
-				chip_base: 100,
-				chip_min: 100,
-				chip_max: -1,
-				addchip_min: 100,
-				addchip_multiple: true,
-				rake: 0.05
+				limit_rule: 0,		// 0: limit, 1: pot limit, 2: no limit
+				limit_bottom: 100,	// big blind
+				limit_top: 200,		// -1, means no limit
+			},
+			min: 2,
+			max: 200
+		},
+		'holdem2': {
+			name: 'texas holdem',
+			desc: 'texas holdem, rule: pot limit',
+			game: 'holdem_game.js',
+			options: {
+				max_seats: 10,
+				no_joker: true,
+				no_number: [],
+				ready_countdown: 10,
+				turn_countdown: 10,
+				limit_rule: 1,		// 0: limit, 1: pot limit, 2: no limit
+				limit_bottom: 100,	// big blind
+				limit_top: -1,		// -1, means no limit
+			},
+			min: 2,
+			max: 200
+		},
+		'holdem3': {
+			name: 'texas holdem',
+			desc: 'texas holdem, rule: no limit',
+			game: 'holdem_game.js',
+			options: {
+				max_seats: 10,
+				no_joker: true,
+				no_number: [],
+				ready_countdown: 10,
+				turn_countdown: 10,
+				limit_rule: 2,		// 0: limit, 1: pot limit, 2: no limit
+				limit_bottom: 100,	// big blind
+				limit_top: -1,		// -1, means no limit
 			},
 			min: 2,
 			max: 200

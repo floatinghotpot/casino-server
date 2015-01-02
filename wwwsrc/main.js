@@ -69,21 +69,43 @@ $(document).ready(function(){
 		addMsg(ret.who.name + ' say: ' + ret.msg);
 	});
 	
-	client.on('deal', function(ret){
-		addMsg('dealing cards ...');
+	client.on('gamestart', function(ret){
+		addMsg('game start');
 		
 		var gamers = client.room.gamers;
 		var seats = client.room.seats;
-		
-		var deals = ret.deals;
 		var inseats = ret.seats;
-		for(var i=0; i<inseats.length; i++) {
-			var gamer = gamers[ seats[ inseats[i] ] ];
-			gamer.coins -= ret.chip;
+		
+		var seat, uid, gamer;
+		if(inseats) {
+			seat = inseats[0];
+			uid = seats[ seat ];
+			gamer = gamers[ uid ];
+			addMsg( 'first/D button: ' + uid + ' at seat ' + seat );
 		}
 		
+		if(ret.ante) {
+			addMsg('ante: ' + ret.ante);
+			for(var i=0; i<inseats.length; i++) {
+				seat = inseats[i];
+				uid = seats[ seat ];
+				gamer = gamers[ uid ];
+				gamer.coins -= ret.ante;
+			}
+		}
+		
+		if(ret.big_blind) {
+			addMsg('big blind: ' + ret.big_blind);
+		}
+	});
+	
+	client.on('deal', function(ret){
+		addMsg('dealing cards ...');
+		
+		client.room.chips = {};
 		var room_cards = client.room.cards = {};
-		var room_chips = client.room.chips = {};
+		
+		var deals = ret.deals;
 		var item, seat, cards;
 		while(deals.length > 0) {
 			item = deals.pop();
@@ -93,10 +115,10 @@ $(document).ready(function(){
 		}
 		
 		showRoom(client.room);
-		addMsg('delay ' + ret.delay + ' sec ...');
 		
-		var first = ret.seats[0];
-		addMsg('first turn: ' + first + ', ' + client.room.seats[ first ]);
+		if(ret.delay) {
+			addMsg('start call/raise in ' + ret.delay + ' seconds ...');
+		}
 	});
 	
 	client.on('moveturn', function(ret){
@@ -111,36 +133,37 @@ $(document).ready(function(){
 		addMsg('count down: ' + ret.seat + ', ' + ret.sec);
 	});
 	
-	client.on('giveup', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' give up');
+	client.on('fold', function(ret){
+		addMsg( ret.uid + ' at ' + ret.seat + ' fold');
 	});
 	
-	client.on('follow', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' follow ' + ret.chip);
+	client.on('call', function(ret){
+		addMsg( ret.uid + ' at ' + ret.seat + ' call ' + ret.chip);
 		
 		var gamers = client.room.gamers;
 		if(ret.uid in gamers) {
-			gamers[ ret.uid ].coins -= ret.chip;
+			gamers[ ret.uid ].coins -= ret.call;
 		}
 		showRoom(client.room);
 	});
 
-	client.on('addchip', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' addchip ' + ret.chip);
+	client.on('raise', function(ret){
+		var raise_sum = (ret.call + ret.raise);
+		addMsg( ret.uid + ' at ' + ret.seat + ' raise ' + ret.raise + '(' + raise_sum + ')');
 		
 		var gamers = client.room.gamers;
 		if(ret.uid in gamers) {
-			gamers[ ret.uid ].coins -= ret.chip;
+			gamers[ ret.uid ].coins -= raise_sum;
 		}
 		showRoom(client.room);
 	});
 
 	client.on('pk', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' pk ' + ret.pk_uid + ' at ' + ret.pk_seat + ', result: ' + (ret.win?'win':'lost'));
+		addMsg( ret.uid + ' at ' + ret.seat + ' pk ' + ret.pk_uid + ' at ' + ret.pk_seat + ', result: ' + (ret.win?'win':'fail'));
 	});
 	
-	client.on('checkcard', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' checkcard' );
+	client.on('seecard', function(ret){
+		addMsg( ret.uid + ' at ' + ret.seat + ' seecard' );
 		if(ret.cards) {
 			client.room.cards[ parseInt(ret.seat) ] = ret.cards;
 			showRoom(client.room);
@@ -184,12 +207,12 @@ $(document).ready(function(){
  *     exit: true,
  *     takeseat: true,
  *     unseat: true,
- *     followchip: true,
- *     addchip: [50,100,150],
- *     addchip: 'range,0,1000000',
- *     giveup: true,
+ *     call: true,
+ *     raise: [50,100,150],
+ *     raise: 'range,0,1000000',
+ *     fold: true,
  *     pk: ['zhang3', 'li4', 'wang5'],
- *     checkcard: true,
+ *     seecard: true,
  *     showcard: true,
  *   }
  */
