@@ -32,12 +32,11 @@ exports = module.exports = {
 				ready_countdown: 10,
 				turn_countdown: 10,
 				ante: 50,			// 锅底
-				chip_min: 50,		// 最少投注
-				chip_max: -1,		// 最大投注
+				bet_min: 50,		// 最少投注
+				bet_max: -1,		// 最大投注
 				raise_min: 50,		// 最少加注
 				raise_multiple: false,
-				poll_top: -1,		// 封顶
-				rake: 0.05
+				pot_cap: -1,		// 封顶
 			},
 			min: 2,
 			max: 200
@@ -53,12 +52,11 @@ exports = module.exports = {
 				ready_countdown: 10,
 				turn_countdown: 10,
 				ante: 500,
-				chip_min: 500,
-				chip_max: -1,
+				bet_min: 500,
+				bet_max: -1,
 				raise_min: 500,
 				raise_multiple: true,	// 以跟注为基础，翻倍加注
-				poll_top: -1,			// 封顶
-				rake: 0.05
+				pot_cap: -1,			// 封顶
 			},
 			min: 2,
 			max: 200
@@ -74,8 +72,8 @@ exports = module.exports = {
 				ready_countdown: 10,
 				turn_countdown: 10,
 				limit_rule: 0,		// 0: limit, 1: pot limit, 2: no limit
-				limit_bottom: 100,	// big blind
-				limit_top: 200,		// -1, means no limit
+				limit: 100,			// big blind
+				limit_cap: 200,		// -1, means no limit
 			},
 			min: 2,
 			max: 200
@@ -91,8 +89,8 @@ exports = module.exports = {
 				ready_countdown: 10,
 				turn_countdown: 10,
 				limit_rule: 1,		// 0: limit, 1: pot limit, 2: no limit
-				limit_bottom: 100,	// big blind
-				limit_top: -1,		// -1, means no limit
+				limit: 100,			// big blind
+				limit_cap: -1,		// -1, means no limit
 			},
 			min: 2,
 			max: 200
@@ -108,8 +106,8 @@ exports = module.exports = {
 				ready_countdown: 10,
 				turn_countdown: 10,
 				limit_rule: 2,		// 0: limit, 1: pot limit, 2: no limit
-				limit_bottom: 100,	// big blind
-				limit_top: -1,		// -1, means no limit
+				limit: 100,			// big blind
+				limit_cap: -1,		// -1, means no limit
 			},
 			min: 2,
 			max: 200

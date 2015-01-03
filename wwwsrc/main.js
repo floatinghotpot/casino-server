@@ -1,7 +1,8 @@
 
 var Client = require('../lib/client'),
 	Poker = require('../lib/poker'),
-	Jinhua = require('../lib/jinhua_poker');
+	Jinhua = require('../lib/jinhua_poker'),
+	Holdem = require('../lib/holdem_poker');
 
 var client = null;
 
@@ -94,8 +95,8 @@ $(document).ready(function(){
 			}
 		}
 		
-		if(ret.big_blind) {
-			addMsg('big blind: ' + ret.big_blind);
+		if(ret.bet_min) {
+			addMsg('bet min: ' + ret.bet_min);
 		}
 	});
 	
@@ -138,7 +139,7 @@ $(document).ready(function(){
 	});
 	
 	client.on('call', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' call ' + ret.chip);
+		addMsg( ret.uid + ' at ' + ret.seat + ' call ' + ret.call);
 		
 		var gamers = client.room.gamers;
 		if(ret.uid in gamers) {
@@ -149,7 +150,7 @@ $(document).ready(function(){
 
 	client.on('raise', function(ret){
 		var raise_sum = (ret.call + ret.raise);
-		addMsg( ret.uid + ' at ' + ret.seat + ' raise ' + ret.raise + '(' + raise_sum + ')');
+		addMsg( ret.uid + ' at ' + ret.seat + ' raise ' + ret.raise + ' (' + raise_sum + ')');
 		
 		var gamers = client.room.gamers;
 		if(ret.uid in gamers) {
@@ -179,15 +180,40 @@ $(document).ready(function(){
 	});
 	
 	client.on('gameover', function(ret){
-		var prize = ret.prize - ret.chips[ ret.seat ];
-		addMsg( 'game over! ' + ret.uid + ' at ' + ret.seat + ' win ' + prize + ' !!');
+		addMsg( 'game over!');
 		
 		var gamers = client.room.gamers;
-		if(ret.uid in gamers) {
-			gamers[ ret.uid ].coins += ret.prize;
+		var cards = client.room.cards;
+		var chips = client.room.chips;
+		while(ret.length > 0) {
+			var gamer = ret.shift();
+			var uid = gamer.uid;
+			
+			var n = (gamer.prize - gamer.chips);
+			if(n > 0) n = '+' + n;
+			
+			var mycards = gamer.cards;
+			var pattern = '';
+			if(mycards.length === 3) {
+				pattern = Jinhua.patternString(mycards);
+			} else {
+				pattern = Holdem.patternString(mycards);
+			}
+			addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + pattern );
+			
+			cards[ gamer.seat ] = gamer.cards;
+			chips[ gamer.seat ] = gamer.chips;
+			
+			// if gamer still in room
+			if(uid in gamers) {
+				delete gamer.cards;
+				delete gamer.chips;
+				delete gamer.prize;
+				
+				gamers[ uid ] = gamer;
+			}
 		}
 		
-		client.room.cards = ret.cards;
 		showRoom(client.room);
 	});
 
