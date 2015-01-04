@@ -86,27 +86,23 @@ $(document).ready(function(){
 			addMsg( 'first/D button: ' + uid + ' at seat ' + seat );
 		}
 		
-		if(ret.ante) {
-			addMsg('ante: ' + ret.ante);
+		if(ret.chips) {
+			client.room.chips = ret.chips;
+			
 			for(var i=0; i<inseats.length; i++) {
 				seat = inseats[i];
 				uid = seats[ seat ];
 				gamer = gamers[ uid ];
-				gamer.coins -= ret.ante;
+				gamer.coins -= ret.chips[ seat ];
 			}
 		}
 		
-		if(ret.bet_min) {
-			addMsg('bet min: ' + ret.bet_min);
-		}
 	});
 	
 	client.on('deal', function(ret){
 		addMsg('dealing cards ...');
 		
-		client.room.chips = {};
 		var room_cards = client.room.cards = {};
-		
 		var deals = ret.deals;
 		var item, seat, cards;
 		while(deals.length > 0) {
@@ -140,23 +136,37 @@ $(document).ready(function(){
 	});
 	
 	client.on('call', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' call ' + ret.call);
+		var seat = parseInt(ret.seat);
+		addMsg( ret.uid + ' at ' + seat + ' call ' + ret.call);
+		
+		var chips = client.room.chips;
+		if(chips) {
+			chips[ seat ] += ret.call;
+		}
 		
 		var gamers = client.room.gamers;
 		if(ret.uid in gamers) {
 			gamers[ ret.uid ].coins -= ret.call;
 		}
+		
 		showRoom(client.room);
 	});
 
 	client.on('raise', function(ret){
+		var seat = parseInt(ret.seat);
 		var raise_sum = (ret.call + ret.raise);
-		addMsg( ret.uid + ' at ' + ret.seat + ' raise ' + ret.raise + ' (' + raise_sum + ')');
+		addMsg( ret.uid + ' at ' + seat + ' raise ' + ret.raise + ' (' + raise_sum + ')');
 		
+		var chips = client.room.chips;
+		if(chips) {
+			chips[ seat ] += raise_sum;
+		}
+
 		var gamers = client.room.gamers;
 		if(ret.uid in gamers) {
 			gamers[ ret.uid ].coins -= raise_sum;
 		}
+		
 		showRoom(client.room);
 	});
 
@@ -165,9 +175,10 @@ $(document).ready(function(){
 	});
 	
 	client.on('seecard', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' seecard' );
+		var seat = parseInt(ret.seat);
+		addMsg( ret.uid + ' at ' + seat + ' seecard' );
 		if(ret.cards) {
-			client.room.cards[ parseInt(ret.seat) ] = ret.cards;
+			client.room.cards[ seat ] = ret.cards;
 			showRoom(client.room);
 		}
 	});
@@ -518,6 +529,7 @@ function showRoom(room) {
 	var gamers = room.gamers;
 	var seats = room.seats;
 	var cards = room.cards;
+	var chips = room.chips;
 	$('#seats').append($('<li>').text('gamers:' + Object.keys(gamers).join(', ')));
 	for(var i=0, len=seats.length; i<len; i++) {
 		var uid = seats[i];
@@ -528,6 +540,10 @@ function showRoom(room) {
 			if(cards && cards[i]) {
 				str += '[ ' + Poker.visualize( cards[i] ) + ' ]';
 			}
+			if(chips && chips[i]) {
+				str += '[ ' + chips[i] + ' ]';
+			}
+			
 		} else {
 			str += '(empty)';
 		}
