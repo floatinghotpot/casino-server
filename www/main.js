@@ -15,7 +15,11 @@ $(document).ready(function(){
 	client = new Client(socket);
 	
 	socket.on('hello', function(data){
+		$('#list').empty();
+		$('#messages').empty();
 		$('div#cmds').empty();
+		showRoom(null);
+		
 		addMsg(data.msg);
 		
 		setTimeout(function(){
@@ -74,42 +78,33 @@ $(document).ready(function(){
 	client.on('gamestart', function(ret){
 		addMsg('game start');
 		
-		var gamers = client.room.gamers;
-		var seats = client.room.seats;
-		var inseats = ret.seats;
+		if(ret.room) {
+			client.room = ret.room;
+		}
 		
-		var seat, uid, gamer;
-		if(inseats) {
-			seat = inseats[0];
-			uid = seats[ seat ];
-			gamer = gamers[ uid ];
+		if(ret.inseats) {
+			var seats = client.room.seats;
+			var seat = ret.inseats[0];
+			var uid = seats[ seat ];
 			addMsg( 'first/D button: ' + uid + ' at seat ' + seat );
 		}
-		
-		if(ret.chips) {
-			client.room.chips = ret.chips;
-			
-			for(var i=0; i<inseats.length; i++) {
-				seat = inseats[i];
-				uid = seats[ seat ];
-				gamer = gamers[ uid ];
-				gamer.coins -= ret.chips[ seat ];
-			}
-		}
-		
 	});
 	
 	client.on('deal', function(ret){
 		addMsg('dealing cards ...');
 		
-		var room_cards = client.room.cards = {};
+		var room_cards = client.room.cards;
 		var deals = ret.deals;
 		var item, seat, cards;
 		while(deals.length > 0) {
 			item = deals.pop();
 			seat = item[0];
 			cards = item[1];
-			room_cards[ seat ] = Poker.sortByNumber( cards );
+			if(seat >= 0) {
+				room_cards[ seat ] = Poker.sortByNumber( cards );
+			} else {
+				client.room.shared_cards = Poker.merge(client.room.shared_cards, cards);
+			}
 		}
 		
 		showRoom(client.room);
@@ -139,6 +134,8 @@ $(document).ready(function(){
 		var seat = parseInt(ret.seat);
 		addMsg( ret.uid + ' at ' + seat + ' call ' + ret.call);
 		
+		client.room.pot += ret.call;
+		
 		var chips = client.room.chips;
 		if(chips) {
 			chips[ seat ] += ret.call;
@@ -157,6 +154,8 @@ $(document).ready(function(){
 		var raise_sum = (ret.call + ret.raise);
 		addMsg( ret.uid + ' at ' + seat + ' raise ' + ret.raise + ' (' + raise_sum + ')');
 		
+		client.room.pot += raise_sum;
+		
 		var chips = client.room.chips;
 		if(chips) {
 			chips[ seat ] += raise_sum;
@@ -172,6 +171,13 @@ $(document).ready(function(){
 
 	client.on('pk', function(ret){
 		addMsg( ret.uid + ' at ' + ret.seat + ' pk ' + ret.pk_uid + ' at ' + ret.pk_seat + ', result: ' + (ret.win?'win':'fail'));
+		
+		var gamers = client.room.gamers;
+		if(ret.uid in gamers) {
+			gamers[ ret.uid ].coins -= ret.pk_cost;
+		}
+		
+		showRoom(client.room);
 	});
 	
 	client.on('seecard', function(ret){
@@ -194,6 +200,7 @@ $(document).ready(function(){
 	client.on('gameover', function(ret){
 		addMsg( 'game over!');
 		
+		var shared_cards = client.room.shared_cards;
 		var gamers = client.room.gamers;
 		var cards = client.room.cards;
 		var chips = client.room.chips;
@@ -208,10 +215,12 @@ $(document).ready(function(){
 			var pattern = '';
 			if(mycards.length === 3) {
 				pattern = Jinhua.patternString(mycards);
+				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + pattern );
 			} else {
-				pattern = Holdem.patternString(mycards);
+				var maxFive = Holdem.sort( Holdem.maxFive(mycards, shared_cards) );
+				pattern = Holdem.patternString( maxFive );
+				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + pattern + ' (' + Poker.visualize(maxFive) + ')' );
 			}
-			addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + pattern );
 			
 			cards[ gamer.seat ] = gamer.cards;
 			chips[ gamer.seat ] = gamer.chips;
@@ -443,6 +452,11 @@ function login(u, p) {
 			echo(ret);
 			socket.emit('hello', {});
 		} else {
+			$('#list').empty();
+			$('#messages').empty();
+			$('div#cmds').empty();
+			showRoom(null);
+
 			localStorage.setItem('x_userid', u);
 			localStorage.setItem('x_passwd', p);
 			addMsg(ret.token.uid + ' (' + ret.profile.name + ') login success');
@@ -485,7 +499,7 @@ function list_rooms( gameid ) {
 				var str = 'room id: ' + room.id + 
 					', name: "' + room.name +
 					'", seats: ' + room.seats_taken + '/' + room.seats_count + 
-					', gamers:' + room.gamers_count;
+					', gamers: ' + room.gamers_count;
 				list.append($('<li>').text(str));
 			}
 		}
@@ -517,12 +531,12 @@ function parseReply(err, ret) {
 }
 
 function showRoom(room) {
+	$('#roomname').text('not in room');
 	$('#seats').empty();
-	
-	if(! room) {
-		$('#roomname').text('not in room');
-		return;
-	}
+	$('#sharedcards').empty();
+	$('#pot').empty();
+	$('#countdown').empty();
+	if(! room) return;
 	
 	$('#roomname').text(room.id + ' (' + room.name + ')');
 	
@@ -530,7 +544,7 @@ function showRoom(room) {
 	var seats = room.seats;
 	var cards = room.cards;
 	var chips = room.chips;
-	$('#seats').append($('<li>').text('gamers:' + Object.keys(gamers).join(', ')));
+	$('#seats').append($('<li>').text('gamers: ' + Object.keys(gamers).join(', ')));
 	for(var i=0, len=seats.length; i<len; i++) {
 		var uid = seats[i];
 		var g = uid ? gamers[ uid ] : null;
@@ -548,6 +562,14 @@ function showRoom(room) {
 			str += '(empty)';
 		}
 		$('#seats').append($('<li>').text(str).attr('id', 'seat'+i).addClass('seat'));
+	}
+	
+	if(room.shared_cards) {
+		$('#sharedcards').text( 'shared cards: ' + Poker.visualize(room.shared_cards) );
+	}
+	
+	if(room.pot) {
+		$('#pot').text( 'pot: ' + room.pot );
 	}
 }
 
@@ -1050,8 +1072,8 @@ Holdem.rank = function(cards) {
  * 斗牌时，每名牌手以自己的两张底牌，加上桌面五张公共牌，共七张牌中，取最大的五张牌组合决定胜负.
  * 当中可包括两张或一张底牌，甚至只有公共牌。
  */
-Holdem.maxFive = function(private_cards, community_cards) {
-	var cards = Poker.sort( Poker.merge( Poker.clone(private_cards), community_cards ) );
+Holdem.maxFive = function(private_cards, shared_cards) {
+	var cards = Poker.sort( Poker.merge( Poker.clone(private_cards), shared_cards ) );
 	var len = cards.length;
 	if(len < 5 || len > 7 ) return null;
 	
