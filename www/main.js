@@ -7,6 +7,8 @@ var Client = require('../lib/client'),
 
 var client = null;
 
+hotjs.i18n.setLang('zh');
+
 $(document).ready(function(){
 	var socket = io();
 	
@@ -36,7 +38,7 @@ $(document).ready(function(){
 	client.on('prompt', updateCmds);
 	
 	client.on('shout', function(ret){
-		addMsg(ret.who.name + ' shout: ' + ret.msg);
+		addMsg(ret.who.name + _T_('shout:') + ret.msg);
 	});
 	
 	client.on('look', function(ret){
@@ -48,12 +50,12 @@ $(document).ready(function(){
 	});
 	
 	client.on('enter', function(ret){
-		addMsg(ret.who.name + ' came into room ' + ret.where);
+		addMsg(ret.who.name + _T_('enter') + ret.where);
 		showRoom(client.room);
 	});
 	
 	client.on('exit', function(ret){
-		addMsg(ret.who.name + ' left room ' + ret.where);
+		addMsg(ret.who.name + _T_('exit') + ret.where);
 		if(ret.uid === client.uid) {
 			showRoom(null);
 		} else {
@@ -62,21 +64,21 @@ $(document).ready(function(){
 	});
 
 	client.on('takeseat', function(ret){
-		addMsg(ret.who.name + ' take seat ' + ret.where);
+		addMsg(ret.who.name + _T_('take seat') + ret.where);
 		showRoom(client.room);
 	});
 
 	client.on('unseat', function(ret){
-		addMsg(ret.who.name + ' stand up from ' + ret.where);
+		addMsg(ret.who.name + _T_('unseat from') + ret.where);
 		showRoom(client.room);
 	});
 
 	client.on('say', function(ret){
-		addMsg(ret.who.name + ' say: ' + ret.msg);
+		addMsg(ret.who.name + _T_('say:') + ret.msg);
 	});
 	
 	client.on('gamestart', function(ret){
-		addMsg('game start');
+		addMsg(_('game start'));
 		
 		if(ret.room) {
 			client.room = ret.room;
@@ -91,7 +93,7 @@ $(document).ready(function(){
 	});
 	
 	client.on('deal', function(ret){
-		addMsg('dealing cards ...');
+		addMsg(_T('dealing cards'));
 		
 		var room_cards = client.room.cards;
 		var deals = ret.deals;
@@ -119,20 +121,20 @@ $(document).ready(function(){
 		$('li.seat').removeClass('active');
 		$('li#seat'+seat).addClass('active');
 		
-		addMsg('now: ' + seat + ', ' + ret.uid);
+		addMsg(_T('now:') + seat + ', ' + ret.uid);
 	});
 	
 	client.on('countdown', function(ret){
-		addMsg('count down: ' + ret.seat + ', ' + ret.sec);
+		addMsg(_T('count down:') + ret.seat + ', ' + ret.sec);
 	});
 	
 	client.on('fold', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' fold');
+		addMsg( ret.uid + ' at ' + ret.seat + _T('fold'));
 	});
 	
 	client.on('call', function(ret){
 		var seat = parseInt(ret.seat);
-		addMsg( ret.uid + ' at ' + seat + ' call ' + ret.call);
+		addMsg( ret.uid + ' at ' + seat + _T('call') + ret.call);
 		
 		client.room.pot += ret.call;
 		
@@ -152,7 +154,7 @@ $(document).ready(function(){
 	client.on('raise', function(ret){
 		var seat = parseInt(ret.seat);
 		var raise_sum = (ret.call + ret.raise);
-		addMsg( ret.uid + ' at ' + seat + ' raise ' + ret.raise + ' (' + raise_sum + ')');
+		addMsg( ret.uid + ' at ' + seat + _T('raise') + ret.raise + ' (' + raise_sum + ')');
 		
 		client.room.pot += raise_sum;
 		
@@ -170,7 +172,7 @@ $(document).ready(function(){
 	});
 
 	client.on('pk', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' pk ' + ret.pk_uid + ' at ' + ret.pk_seat + ', result: ' + (ret.win?'win':'fail'));
+		addMsg( ret.uid + ' at ' + ret.seat +  _T('pk') + ret.pk_uid + ' at ' + ret.pk_seat + ', result: ' + (ret.win?'win':'fail'));
 		
 		var gamers = client.room.gamers;
 		if(ret.uid in gamers) {
@@ -182,7 +184,7 @@ $(document).ready(function(){
 	
 	client.on('seecard', function(ret){
 		var seat = parseInt(ret.seat);
-		addMsg( ret.uid + ' at ' + seat + ' seecard' );
+		addMsg( ret.uid + ' at ' + seat + _T('seecard') );
 		if(ret.cards) {
 			client.room.cards[ seat ] = ret.cards;
 			showRoom(client.room);
@@ -190,7 +192,7 @@ $(document).ready(function(){
 	});
 	
 	client.on('showcard', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + ' showcard' );
+		addMsg( ret.uid + ' at ' + ret.seat + _T('showcard') );
 		if(ret.cards) {
 			client.room.cards[ parseInt(ret.seat) ] = ret.cards;
 			showRoom(client.room);
@@ -198,7 +200,7 @@ $(document).ready(function(){
 	});
 	
 	client.on('gameover', function(ret){
-		addMsg( 'game over!');
+		addMsg( _T('game over!'));
 		
 		var shared_cards = client.room.shared_cards;
 		var gamers = client.room.gamers;
@@ -266,7 +268,7 @@ $(document).ready(function(){
 function parseSignUpReply(err,ret){
 	parseReply(err,ret);
 	if(! err) {
-		addMsg('account created: ' + ret.uid + '/' + ret.passwd);
+		addMsg(_T('account created:') + ret.uid + '/' + ret.passwd);
 		login(ret.uid, ret.passwd);
 	}
 }
@@ -333,7 +335,7 @@ function updateCmds( cmds ){
 			$('button#'+k).remove();
 			
 		} else if(v === true) {
-			btn = $('<button>').text(k).attr('id', k).attr('arg', 0).addClass('cmd');
+			btn = $('<button>').text(_T(k)).attr('id', k).attr('arg', 0).addClass('cmd');
 			$('#cmds').append(btn);
 			btn.on('click', onBtnClicked);
 			
@@ -362,7 +364,7 @@ function updateCmds( cmds ){
 				break;
 			}
 			div.append(input);
-			btn = $('<button>').text(k).attr('id', k).addClass('cmd');
+			btn = $('<button>').text(_T(k)).attr('id', k).addClass('cmd');
 			div.append(btn);
 			btn.on('click', onInputBtnClicked);
 			input.keydown(onInputBoxEnter);
@@ -372,13 +374,13 @@ function updateCmds( cmds ){
 			$('#cmds').append(div);
 			for(var i=0; i<v.length; i++) {
 				var arg = v[i];
-				btn = $('<button>').text(k+' '+arg).attr('id', k).attr('arg', arg).addClass('cmd');
+				btn = $('<button>').text(_T(k)+' '+ _T(arg)).attr('id', k).attr('arg', arg).addClass('cmd');
 				div.append(btn);
 				btn.on('click', onBtnClicked);
 			}
 			
 		} else if( typeof v === 'object' ) {
-			btn = $('<button>').text(k).attr('id', k).addClass('cmd');
+			btn = $('<button>').text(_T(k)).attr('id', k).addClass('cmd');
 			$('#cmds').append(btn);
 			
 			var dlg = $('<div>').attr('id',k).addClass('dialog');
@@ -387,11 +389,11 @@ function updateCmds( cmds ){
 			
 			var dlgheader = $('<div>').addClass('dlgheader');
 			dlg.append(dlgheader);
-			dlgheader.append($('<span>').text(k));
+			dlgheader.append($('<span>').text(_T(k)));
 			var X = $('<button>').text('X').attr('X', k).addClass('cmd');
 			dlgheader.append(X);
 			for(var j in v) {
-				label = $('<label>').attr('for', j).text(j+':').addClass('cmd');
+				label = $('<label>').attr('for', j).text(_T(j)+':').addClass('cmd');
 				input = $('<input>').attr('id', j).addClass(k).addClass('cmd');
 				
 				words = v[j].split(',');

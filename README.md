@@ -3,13 +3,14 @@
 An online poker game server powered by node.js and socket.io
   
 Game rules supported:
+- [x] Chat Room (聊天室)
 - [x] Jinhua (诈金花/三张牌)
-- [ ] Texas Holdem (德州扑克)
+- [x] Texas Holdem (德州扑克)
 - [ ] Fight Landlord (斗地主)
 - [ ] Blackjack (21点)
 
 Features: 
-- [x] Cross-platform: powered by node.js, easy to deploy on varios platforms.
+- [x] Cross-platform: powered by node.js, easy to deploy on various platforms.
 - [x] Scalable: using Redis as message bus and data storage.
 - [x] Open architecture: with Redis as the message bus, easy to interact and extend.
 - [x] Cluster: using node.js cluster, sticky session, and socket.io-redis.
