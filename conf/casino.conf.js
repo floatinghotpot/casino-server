@@ -11,6 +11,12 @@ exports = module.exports = {
 		port: 6379,
 		passwd: null
 	},
+	new_user : {
+		coins: 10000,
+		score: 0,
+		exp: 0,
+		level: 1
+	},
 	games: {
 		'chat': {
 			name: 'chat_room',
