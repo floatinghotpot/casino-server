@@ -16,7 +16,6 @@ $(document).ready(function(){
 	client = new Client(socket);
 	
 	socket.on('hello', function(data){
-		$('#list').empty();
 		$('#messages').empty();
 		$('div#cmds').empty();
 		showRoom(null);
@@ -57,6 +56,7 @@ $(document).ready(function(){
 		addMsg(ret.who.name + _T_('exit') + ret.where);
 		if(ret.uid === client.uid) {
 			showRoom(null);
+			list_games();
 		} else {
 			showRoom(client.room);
 		}
@@ -111,7 +111,7 @@ $(document).ready(function(){
 		showRoom(client.room);
 		
 		if(ret.delay) {
-			addMsg('start call/raise in ' + ret.delay + ' seconds ...');
+			addMsg(_T_('delay') + ret.delay + _T_('seconds') + _T_('to bet') );
 		}
 	});
 	
@@ -128,12 +128,12 @@ $(document).ready(function(){
 	});
 	
 	client.on('fold', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + _T('fold'));
+		addMsg( ret.uid + _T('at seat') + ret.seat + _T('fold'));
 	});
 	
 	client.on('call', function(ret){
 		var seat = parseInt(ret.seat);
-		addMsg( ret.uid + ' at ' + seat + _T('call') + ret.call);
+		addMsg( ret.uid + _T('at seat') + seat + _T('call') + ret.call);
 		
 		client.room.pot += ret.call;
 		
@@ -153,7 +153,7 @@ $(document).ready(function(){
 	client.on('raise', function(ret){
 		var seat = parseInt(ret.seat);
 		var raise_sum = (ret.call + ret.raise);
-		addMsg( ret.uid + ' at ' + seat + _T('raise') + ret.raise + ' (' + raise_sum + ')');
+		addMsg( ret.uid + _T('at seat') + seat + _T('raise') + ret.raise + ' (' + raise_sum + ')');
 		
 		client.room.pot += raise_sum;
 		
@@ -171,7 +171,7 @@ $(document).ready(function(){
 	});
 
 	client.on('pk', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat +  _T('pk') + ret.pk_uid + ' at ' + ret.pk_seat + ', result: ' + (ret.win?'win':'fail'));
+		addMsg( ret.uid + _T('at seat') + ret.seat +  _T('pk') + ret.pk_uid + _T('at seat') + ret.pk_seat + ', ' + _T('result') + ': ' + (ret.win?_T('win'):_T('fail')));
 		
 		var gamers = client.room.gamers;
 		if(ret.uid in gamers) {
@@ -183,7 +183,7 @@ $(document).ready(function(){
 	
 	client.on('seecard', function(ret){
 		var seat = parseInt(ret.seat);
-		addMsg( ret.uid + ' at ' + seat + _T('seecard') );
+		addMsg( ret.uid + _T('at seat') + seat + _T('seecard') );
 		if(ret.cards) {
 			client.room.cards[ seat ] = ret.cards;
 			showRoom(client.room);
@@ -191,7 +191,7 @@ $(document).ready(function(){
 	});
 	
 	client.on('showcard', function(ret){
-		addMsg( ret.uid + ' at ' + ret.seat + _T('showcard') );
+		addMsg( ret.uid + _T('at seat') + ret.seat + _T('showcard') );
 		if(ret.cards) {
 			client.room.cards[ parseInt(ret.seat) ] = ret.cards;
 			showRoom(client.room);
@@ -453,18 +453,21 @@ function login(u, p) {
 			echo(ret);
 			socket.emit('hello', {});
 		} else {
-			$('#list').empty();
 			$('#messages').empty();
 			$('div#cmds').empty();
 			showRoom(null);
 
 			localStorage.setItem('x_userid', u);
 			localStorage.setItem('x_passwd', p);
-			addMsg(ret.token.uid + ' (' + ret.profile.name + ') login success');
+			addMsg(ret.token.uid + ' (' + ret.profile.name + ') ' + _T('login success'));
 			
-			if(ret.cmds) updateCmds(ret.cmds);
-			
-			list_games();
+			if(ret.cmds) {
+				updateCmds(ret.cmds);
+				
+				if('entergame' in ret.cmds) {
+					list_games();
+				}
+			}
 		}
 		
 	}, function(err){
@@ -478,11 +481,12 @@ function list_games(){
 	client.rpc('games', 0, function(err, ret){
 		if(err) echo(ret);
 		else {
+			$('#roomname').text(_T('available games'));
 			var list = $('#list');
 			list.empty();
 			for(var i=0; i<ret.length; i++) {
 				var game = ret[i];
-				var str = game.id + ': ' + game.name + ' (' + game.desc + '), ' + game.rooms + ' rooms';
+				var str = (i+1) + ', ' + _T_( game.id ) + ': ' + game.name + ' (' + game.desc + '), ' + game.rooms + ' rooms';
 				list.append($('<li>').text(str));
 			}
 		}
@@ -532,20 +536,20 @@ function parseReply(err, ret) {
 }
 
 function showRoom(room) {
-	$('#roomname').text('not in room');
-	$('#seats').empty();
+	$('#roomname').text(_T('not in room'));
+	$('#list').empty();
 	$('#sharedcards').empty();
 	$('#pot').empty();
 	$('#countdown').empty();
 	if(! room) return;
 	
-	$('#roomname').text(room.id + ' (' + room.name + ')');
+	$('#roomname').text( _T('room number') + ': ' + room.id + ' (' + room.name + ')');
 	
 	var gamers = room.gamers;
 	var seats = room.seats;
 	var cards = room.cards;
 	var chips = room.chips;
-	$('#seats').append($('<li>').text('gamers: ' + Object.keys(gamers).join(', ')));
+	$('#list').append($('<li>').text(_T('gamers in room') + ': ' + Object.keys(gamers).join(', ')));
 	for(var i=0, len=seats.length; i<len; i++) {
 		var uid = seats[i];
 		var g = uid ? gamers[ uid ] : null;
@@ -553,24 +557,24 @@ function showRoom(room) {
 		if(g) {
 			str += g.uid + ' (' + g.name + ') [' + g.coins + ', ' + g.score + ', ' + g.exp + ', ' + g.level + ']';
 			if(cards && cards[i]) {
-				str += '[ ' + Poker.visualize( cards[i] ) + ' ]';
+				str += _T_('private cards') + '[ ' + Poker.visualize( cards[i] ) + ' ]';
 			}
 			if(chips && chips[i]) {
-				str += '[ ' + chips[i] + ' ]';
+				str += _T_('bet') + '[ ' + chips[i] + ' ]';
 			}
 			
 		} else {
-			str += '(empty)';
+			str += '(' + _T('empty') + ')';
 		}
-		$('#seats').append($('<li>').text(str).attr('id', 'seat'+i).addClass('seat'));
+		$('#list').append($('<li>').text(str).attr('id', 'seat'+i).addClass('seat'));
 	}
 	
 	if(room.shared_cards) {
-		$('#sharedcards').text( 'shared cards: ' + Poker.visualize(room.shared_cards) );
+		$('#sharedcards').text( _T('shared cards') + ': ' + Poker.visualize(room.shared_cards) );
 	}
 	
 	if(room.pot) {
-		$('#pot').text( 'pot: ' + room.pot );
+		$('#pot').text( _T('pot') + ': ' + room.pot );
 	}
 }
 
@@ -584,7 +588,6 @@ function execCmd() {
 	switch(words[0]) {
 	case 'clear':
 		$('#list').empty();
-		$('#seats').empty();
 		$('#messages').empty();
 		break;
 	case 'fastsignup':
@@ -628,6 +631,7 @@ function execCmd() {
 			else {
 				echo(ret);
 				showRoom(null);
+				list_games();
 			}
 		});
 		break;
