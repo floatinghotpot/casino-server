@@ -1,9 +1,9 @@
 # casino-server #
 
-An online poker game server powered by node.js and socket.io
+An online poker game server powered by redis, node.js and socket.io
 
 ![A](https://github.com/floatinghotpot/casino-server/raw/master/wwwsrc/img/4_14.png) ![A](https://github.com/floatinghotpot/casino-server/raw/master/wwwsrc/img/3_14.png)
-![A](https://github.com/floatinghotpot/casino-server/raw/master/wwwsrc/img/1_14.png)
+![A](https://github.com/floatinghotpot/casino-server/raw/master/wwwsrc/img/2_14.png)
   
 Game rules supported:
 - [x] Chat Room (聊天室)
