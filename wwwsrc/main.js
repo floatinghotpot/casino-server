@@ -6,7 +6,7 @@ var Client = require('../lib/client'),
 
 var client = null;
 
-hotjs.i18n.setLang('zh');
+//hotjs.i18n.setLang('zh');
 
 Poker.toHTML = function(cards) {
 	var html = '';
