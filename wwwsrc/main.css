@@ -30,7 +30,6 @@ div#cmds {
 	width: 100%;
 	position: fixed;
 	bottom: 0;
-	background-color: gray;
 }
 
 form {
@@ -109,7 +108,16 @@ input.cmd {
 	background: #eee;
 }
 
-li.active {
+li.active, div.active {
 	background: yellow;	
 }
 
+li.active, div.active {
+	background: yellow;	
+	border: 1px solid black;
+}
+
+li.inactive, div.inactive {
+	background: gray;	
+	border: 1px solid black;
+}

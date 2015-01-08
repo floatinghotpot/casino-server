@@ -7,7 +7,19 @@ var Client = require('../lib/client'),
 
 var client = null;
 
-//hotjs.i18n.setLang('zh');
+hotjs.i18n.setLang('zh');
+
+Poker.toHTML = function(cards) {
+	var html = '';
+	for(var i=0; i<cards.length; i++) {
+		var card = cards[i];
+		var color = card >> 4;
+		var number = card & 0xf;
+		var png = color + '_' + number + '.png';
+		html += "<img src='img/" + png + "'/>";
+	}
+	return html;
+};
 
 $(document).ready(function(){
 	var socket = io();
@@ -78,7 +90,7 @@ $(document).ready(function(){
 	});
 	
 	client.on('gamestart', function(ret){
-		addMsg(_('game start'));
+		addMsg(_T('game start'));
 		
 		if(ret.room) {
 			client.room = ret.room;
@@ -120,6 +132,14 @@ $(document).ready(function(){
 		var seat = ret.seat;
 		$('li.seat').removeClass('active');
 		$('li#seat'+seat).addClass('active');
+		
+		if(ret.uid === client.uid) {
+			$('#cmds').removeClass('inactive');
+			$('#cmds').addClass('active');
+		} else {
+			$('#cmds').removeClass('active');
+			$('#cmds').addClass('inactive');
+		}
 		
 		addMsg(_T('now:') + seat + ', ' + ret.uid);
 	});
@@ -172,7 +192,7 @@ $(document).ready(function(){
 	});
 
 	client.on('pk', function(ret){
-		addMsg( ret.uid + _T('at seat') + ret.seat +  _T('pk') + ret.pk_uid + _T('at seat') + ret.pk_seat + ', ' + _T('result') + ': ' + (ret.win?_T('win'):_T('fail')));
+		addMsg( ret.uid + _T_('at seat') + ret.seat +  _T('pk') + ret.pk_uid + _T_('at seat') + ret.pk_seat + ', ' + _T('result') + ': ' + (ret.win?_T('win'):_T('fail')));
 		
 		var gamers = client.room.gamers;
 		if(ret.uid in gamers) {
@@ -217,11 +237,11 @@ $(document).ready(function(){
 			var pattern = '';
 			if(mycards.length === 3) {
 				pattern = Jinhua.patternString(mycards);
-				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + pattern );
+				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + _T_(pattern) );
 			} else {
 				var maxFive = Holdem.sort( Holdem.maxFive(mycards, shared_cards) );
 				pattern = Holdem.patternString( maxFive );
-				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + pattern + ' (' + Poker.visualize(maxFive) + ')' );
+				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + _T_(pattern) + ' (' + Poker.visualize(maxFive) + ')' );
 			}
 			
 			cards[ gamer.seat ] = gamer.cards;
@@ -374,7 +394,8 @@ function updateCmds( cmds ){
 			$('#cmds').append(div);
 			for(var i=0; i<v.length; i++) {
 				var arg = v[i];
-				btn = $('<button>').text(_T(k)+' '+ _T(arg)).attr('id', k).attr('arg', arg).addClass('cmd');
+				var t_arg = (typeof arg === 'string') ? _T(arg) : arg;
+				btn = $('<button>').text(_T(k)+' '+ t_arg).attr('id', k).attr('arg', arg).addClass('cmd');
 				div.append(btn);
 				btn.on('click', onBtnClicked);
 			}
@@ -483,7 +504,7 @@ function list_games(){
 		if(err) echo(ret);
 		else {
 			$('#roomname').text(_T('available games'));
-			var list = $('#list');
+			var list = $('#seats');
 			list.empty();
 			for(var i=0; i<ret.length; i++) {
 				var game = ret[i];
@@ -498,7 +519,7 @@ function list_rooms( gameid ) {
 	client.rpc('rooms', gameid, function(err, ret){
 		if(err) echo(ret);
 		else {
-			var list = $('#list');
+			var list = $('#seats');
 			list.empty();
 			for(var i=0; i<ret.length; i++) {
 				var room = ret[i];
@@ -537,11 +558,13 @@ function parseReply(err, ret) {
 }
 
 function showRoom(room) {
-	$('#roomname').text(_T('not in room'));
-	$('#list').empty();
+	$('#roomname').empty();
+	$('#roomdesc').empty();
 	$('#sharedcards').empty();
 	$('#pot').empty();
 	$('#countdown').empty();
+	$('#seats').empty();
+	$('#mycards').empty();
 	if(! room) return;
 	
 	$('#roomname').text( _T('room number') + ': ' + room.id + ' (' + room.name + ')');
@@ -550,7 +573,7 @@ function showRoom(room) {
 	var seats = room.seats;
 	var cards = room.cards;
 	var chips = room.chips;
-	$('#list').append($('<li>').text(_T('gamers in room') + ': ' + Object.keys(gamers).join(', ')));
+	$('#roomdesc').text(_T('gamers in room') + ': ' + Object.keys(gamers).join(', '));
 	for(var i=0, len=seats.length; i<len; i++) {
 		var uid = seats[i];
 		var g = uid ? gamers[ uid ] : null;
@@ -559,6 +582,10 @@ function showRoom(room) {
 			str += g.uid + ' (' + g.name + ') [' + g.coins + ', ' + g.score + ', ' + g.exp + ', ' + g.level + ']';
 			if(cards && cards[i]) {
 				str += _T_('private cards') + '[ ' + Poker.visualize( cards[i] ) + ' ]';
+				
+				if(g.uid === client.uid) {
+					$('#mycards').html( client.uid + ', ' + _T('my cards') + ': <br/>' + Poker.toHTML(cards[i]) );
+				}
 			}
 			if(chips && chips[i]) {
 				str += _T_('bet') + '[ ' + chips[i] + ' ]';
@@ -567,16 +594,17 @@ function showRoom(room) {
 		} else {
 			str += '(' + _T('empty') + ')';
 		}
-		$('#list').append($('<li>').text(str).attr('id', 'seat'+i).addClass('seat'));
+		$('#seats').append($('<li>').text(str).attr('id', 'seat'+i).addClass('seat'));
 	}
 	
 	if(room.shared_cards) {
-		$('#sharedcards').text( _T('shared cards') + ': ' + Poker.visualize(room.shared_cards) );
+		$('#sharedcards').html( _T('shared cards') + ': <br/>' + Poker.toHTML(room.shared_cards) );
 	}
 	
 	if(room.pot) {
 		$('#pot').text( _T('pot') + ': ' + room.pot );
 	}
+	
 }
 
 function execCmd() {
@@ -588,7 +616,7 @@ function execCmd() {
 	var words = cmd.split(' ');
 	switch(words[0]) {
 	case 'clear':
-		$('#list').empty();
+		$('#seats').empty();
 		$('#messages').empty();
 		break;
 	case 'fastsignup':
@@ -922,17 +950,17 @@ var HIGH_CARD		= 1, // 高牌, AQ953
 	ROYAL_FLUSH		= 10; // 皇家同花顺, AKQJ10
 
 var HOLDEM_PATTERNS = {
-	0: 'Invalid',		// 错误
-	1: 'High Card',		// 高牌
-	2: 'One Pair',		// 一对
-	3: 'Two Pair',		// 两对
-	4: 'Three of a Kind', // 三条
-	5: 'Straight', 		// 顺子
-	6: 'Flush', 		//  同花
-	7: 'Fullhouse', 	// 葫芦
-	8: 'Four of a Kind', // 四条
-	9: 'Straight Flush', // 同花顺
-	10: 'Royal Flush' 	// 皇家同花顺
+	0: 'invalid',		// 错误
+	1: 'high card',		// 高牌
+	2: 'one pair',		// 一对
+	3: 'two pair',		// 两对
+	4: 'three of a kind', // 三条
+	5: 'straight', 		// 顺子
+	6: 'flush', 		//  同花
+	7: 'fullhouse', 	// 葫芦
+	8: 'four of a kind', // 四条
+	9: 'straight flush', // 同花顺
+	10: 'royal flush' 	// 皇家同花顺
 };
 
 var Holdem = {
@@ -1150,13 +1178,13 @@ var HIGH_CARD		= 1, // 单张
 	THREE			= 6; // 豹子
 
 var JINHUA_PATTERNS = {
-	0: '错误',
-	1: '单张',
-	2: '对子',
-	3: '顺子',
-	4: '同花',
-	5: '同花顺',
-	6: '豹子'
+	0: 'invalid',
+	1: 'danzhang',
+	2: 'duizi',
+	3: 'shunzi',
+	4: 'tonghua',
+	5: 'tonghuashun',
+	6: 'baozi'
 };
 
 var Jinhua = {
