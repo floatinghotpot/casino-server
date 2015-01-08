@@ -36,7 +36,7 @@ exports = module.exports = {
 				no_joker: true,
 				no_number: [],
 				ready_countdown: 10,
-				turn_countdown: 10,
+				turn_countdown: 20,
 				ante: 50,			// 锅底
 				bet_min: 50,		// 最少投注
 				bet_max: -1,		// 最大投注
@@ -56,7 +56,7 @@ exports = module.exports = {
 				no_joker: true,
 				no_number: [2,3,4,5,6],
 				ready_countdown: 10,
-				turn_countdown: 10,
+				turn_countdown: 20,
 				ante: 500,
 				bet_min: 500,
 				bet_max: -1,
@@ -76,7 +76,7 @@ exports = module.exports = {
 				no_joker: true,
 				no_number: [],
 				ready_countdown: 10,
-				turn_countdown: 10,
+				turn_countdown: 20,
 				limit_rule: 0,		// 0: limit, 1: pot limit, 2: no limit
 				limit: 100,			// big blind
 				limit_cap: 200,		// -1, means no limit
@@ -93,7 +93,7 @@ exports = module.exports = {
 				no_joker: true,
 				no_number: [],
 				ready_countdown: 10,
-				turn_countdown: 10,
+				turn_countdown: 20,
 				limit_rule: 1,		// 0: limit, 1: pot limit, 2: no limit
 				limit: 100,			// big blind
 				limit_cap: -1,		// -1, means no limit
@@ -110,7 +110,7 @@ exports = module.exports = {
 				no_joker: true,
 				no_number: [],
 				ready_countdown: 10,
-				turn_countdown: 10,
+				turn_countdown: 20,
 				limit_rule: 2,		// 0: limit, 1: pot limit, 2: no limit
 				limit: 100,			// big blind
 				limit_cap: -1,		// -1, means no limit

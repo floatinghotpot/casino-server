@@ -34,6 +34,7 @@ hotjs.i18n.put('en', {
 	'showcard': 'Show Card',
 	'call': 'Call',
 	'raise': 'Raise',
+	'all_in': 'All In',
 	'fold': 'Fold/Give Up',
 	'check': 'Check',
 	'pk': 'PK',
