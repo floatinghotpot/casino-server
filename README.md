@@ -17,8 +17,14 @@ Features:
 - [x] Scalable: using Redis as message bus and data storage.
 - [x] Open architecture: with Redis as the message bus, easy to interact and extend.
 - [x] Cluster: using node.js cluster, sticky session, and socket.io-redis.
-- [x] Load balancing: using NginX as load balancer.
-- [x] WebSocket protocol: come with javascript client API and web-based demo. API in other languages to be implemented.
+- [x] WebSocket protocol: come with javascript client API and web-based demo. 
+- [x] Event logger for server events and user actions.
+
+TODO List:
+- [ ] Load balancing: using NginX as load balancer.
+- [ ] Client API in other language (priority: C/C++, C#, Java, Objective-C, etc.)
+- [ ] Payment gateway callback URL.
+- [ ] Admin Portal.
 
 # Architecture #
 
@@ -34,7 +40,7 @@ Redis is an open source, BSD licensed, advanced key-value cache and store. It is
 
 * node.js / npm
 
-Node.js® is a platform built on Chrome's JavaScript runtime for easily building fast, scalable network applications. Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient, perfect for data-intensive real-time applications that run across distributed devices.
+Node.js is a platform built on Chrome's JavaScript runtime for easily building fast, scalable network applications. Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient, perfect for data-intensive real-time applications that run across distributed devices.
 
 [Download](http://nodejs.org/download)
 
@@ -94,4 +100,23 @@ Or, log the events into log file:
 bin/logger.js -o ./tmp/casino.log
 ```
 
+# Credits #
+
+This poker game server is created by Raymond Xie, published under MIT license.
+
+It can be used for FREE, but be aware that:
+
+* It is provided as it is. (Not a mature commercial product, may be incomplete, or even lots of bugs)
+* We will mainly focus on our own needs. 
+* You can propose wish for new features, but don't rely on us to implement them. Instead of waiting for new features, welcome join us to implement them.
+* You need take your own risk, including that you need find answers from reading code instead of easily asking only. :P
+
+If you are interested in this project, you can contribute in any of following aspects:
+
+* Simply "Star" it.
+* Use it or test it, report bugs or even send pull request of patches.
+* Add better HTML5 demo client.
+* Add new poker game rules.
+* Add client APIs in other languages (like C/C++, C#, Java, etc.)
+* Help us write documentation, if your English is good.
 
