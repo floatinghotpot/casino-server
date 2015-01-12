@@ -7,8 +7,6 @@ var Client = require('../lib/client'),
 
 var client = null;
 
-//hotjs.i18n.setLang('zh');
-
 Poker.toHTML = function(cards) {
 	var html = '';
 	for(var i=0; i<cards.length; i++) {
@@ -28,6 +26,23 @@ $(document).ready(function(){
 	
 	client = new Client(socket);
 	
+	var lang = $.cookie('lang');
+	if(lang) {
+		$("select#lang option").filter(function() {
+		    return $(this).val() == lang; 
+		}).prop('selected', true);
+		
+		hotjs.i18n.setLang( lang );
+		hotjs.i18n.translate();
+	}
+
+	$('select#lang').change(function(){
+		$( "select#lang option:selected" ).each(function() {
+			$.cookie('lang', $(this).val());
+			location.reload();
+		});	
+	});
+
 	socket.on('hello', function(data){
 		$('#messages').empty();
 		$('div#cmds').empty();
@@ -41,7 +56,8 @@ $(document).ready(function(){
 			if(u && p) {
 				login(u, p);
 			} else {
-				socket.emit('hello', {});
+				//socket.emit('hello', {});
+				client.rpc('fastsignup', 0, parseSignUpReply);
 			}
 		}, 1000);
 	});
@@ -149,12 +165,12 @@ $(document).ready(function(){
 	});
 	
 	client.on('fold', function(ret){
-		addMsg( ret.uid + _T('at seat') + ret.seat + _T('fold'));
+		addMsg( ret.uid + _T_('at seat') + ret.seat + _T_('fold'));
 	});
 	
 	client.on('call', function(ret){
 		var seat = parseInt(ret.seat);
-		addMsg( ret.uid + _T('at seat') + seat + _T('call') + ret.call);
+		addMsg( ret.uid + _T_('at seat') + seat + _T_('call') + ret.call);
 		
 		client.room.pot += ret.call;
 		
@@ -174,7 +190,7 @@ $(document).ready(function(){
 	client.on('raise', function(ret){
 		var seat = parseInt(ret.seat);
 		var raise_sum = (ret.call + ret.raise);
-		addMsg( ret.uid + _T('at seat') + seat + _T('raise') + ret.raise + ' (' + raise_sum + ')');
+		addMsg( ret.uid + _T_('at seat') + seat + _T_('raise') + ret.raise + ' (' + raise_sum + ')');
 		
 		client.room.pot += raise_sum;
 		
@@ -204,7 +220,7 @@ $(document).ready(function(){
 	
 	client.on('seecard', function(ret){
 		var seat = parseInt(ret.seat);
-		addMsg( ret.uid + _T('at seat') + seat + _T('seecard') );
+		addMsg( ret.uid + _T_('at seat') + seat + _T_('seecard') );
 		if(ret.cards) {
 			client.room.cards[ seat ] = ret.cards;
 			showRoom(client.room);
@@ -212,7 +228,7 @@ $(document).ready(function(){
 	});
 	
 	client.on('showcard', function(ret){
-		addMsg( ret.uid + _T('at seat') + ret.seat + _T('showcard') );
+		addMsg( ret.uid + _T_('at seat') + ret.seat + _T_('showcard') );
 		if(ret.cards) {
 			client.room.cards[ parseInt(ret.seat) ] = ret.cards;
 			showRoom(client.room);

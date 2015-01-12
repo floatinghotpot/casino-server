@@ -1,4 +1,5 @@
 hotjs.i18n.put('zh', {
+	'language': '语言',
 	'fastsignup': '快速注册',
 	'signup': '注册',
 	'login': '登录',

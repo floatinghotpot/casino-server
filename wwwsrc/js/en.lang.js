@@ -1,4 +1,5 @@
 hotjs.i18n.put('en', {
+	'language': 'Language',
 	'fastsignup': 'Fast Sign Up',
 	'signup': 'Sign Up',
 	'login': 'Login',

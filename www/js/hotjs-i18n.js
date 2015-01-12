@@ -59,9 +59,8 @@ hotjs.i18n = {
 	setLang : function(lang, cook) {
 		this.lang = lang;
 		if (cook) {
-			var wl = window.location, now = new Date(), time = now.getTime();
-			time += this.cookievalid;
-			now.setTime(time);
+			var wl = window.location, now = new Date();
+			now.setTime( now.getTime() + this.cookievalid );
 			document.cookie = 'lang=' + lang + ';path=' + wl.pathname + ';domain=' + wl.host + ';expires=' + now.toGMTString();
 		}
 		return this;
