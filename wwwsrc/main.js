@@ -382,7 +382,10 @@ function updateCmds( cmds ){
 			switch(words[0]) {
 			case 'range':
 				input.attr('type', 'range');
-				if(words[1]) input.attr('min', parseInt(words[1]));
+				if(words[1]) {
+					var min = parseInt(words[1]);
+					input.attr('min', min).val(min);
+				}
 				if(words[2]) input.attr('max', parseInt(words[2]));
 				break;
 			case 'number':
