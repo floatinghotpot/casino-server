@@ -47,6 +47,7 @@ Node.js is a platform built on Chrome's JavaScript runtime for easily building f
 # Installation #
 
 * Installing globally and run as service: 
+
 ```bash
 [sudo] npm install forever -g
 [sudo] npm install casino-server -g
