@@ -18,7 +18,7 @@ Features:
 - [x] Cross-platform: powered by node.js, easy to deploy on various platforms.
 - [x] Scalable: using Redis as message bus and data storage.
 - [x] Open architecture: with Redis as the message bus, easy to interact and extend.
-- [x] Cluster: using node.js cluster, sticky session, and socket.io-redis.
+- [x] Cluster: using PM2, sticky session, and socket.io-redis.
 - [x] WebSocket protocol: come with javascript client API and web-based demo. 
 - [x] Event logger for server events and user actions.
 
@@ -46,19 +46,25 @@ Node.js is a platform built on Chrome's JavaScript runtime for easily building f
 
 [Download](http://nodejs.org/download)
 
+* PM2 (production & cluster)
+
+PM2 is a production process manager for Node.js applications with a built-in load balancer. It allows you to keep applications alive forever, to reload them without downtime and to facilitate common system admin tasks.
+
+[Read More](https://github.com/Unitech/pm2)
+
 # Installation #
 
-* Installing globally and run as service: 
+* Installing globally and run as service with PM2: 
 
 ```bash
-[sudo] npm install forever -g
+[sudo] npm install pm2 -g
 [sudo] npm install casino-server -g
 
 # run redis-server first
 redis-server &
 
-# run as service
-forever start casino-server
+# run as service and cluster mode
+pm2 start `which casino-server` -i 0
 ```
 
 * Installing as a node app, and run in current folder:
@@ -81,7 +87,7 @@ open http://localhost:7000/
 
 -p Port to use (defaults to 7000)
 
--a Address to use (defaults to 0.0.0.0)
+-h Host address to use (defaults to 0.0.0.0)
 
 -r Address of Redis server (defaults to 127.0.0.1:6379)
 
