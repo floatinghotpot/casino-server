@@ -18,8 +18,8 @@ describe("A suite for data model", function() {
 	});
 
 	afterEach(function() {
-		if(server) server.shutdown();
-		if(casino) casino.shutdown();
+		server.shutdown();
+		casino.shutdown();
 		
 	});
 	
