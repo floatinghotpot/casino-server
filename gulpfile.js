@@ -76,7 +76,7 @@ gulp.task('build-img', function(){
 
 // start a server
 gulp.task('restart-casino-server', function () {
-    return gulp.src('spec/test_service.js')
+    return gulp.src('spec/e2e/test_service.js')
         .pipe(jasmine({
         	//isVerbose: true,
         	includeStackTrace:true

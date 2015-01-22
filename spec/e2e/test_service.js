@@ -1,9 +1,9 @@
 
-var Server = require('../lib/login_server'),
-	Casino = require('../lib/game_server'),
-	conf = require('../conf/casino.conf');
+var Server = require('../../lib/login_server'),
+	Casino = require('../../lib/game_server'),
+	conf = require('../../conf/casino.conf');
 
-describe("A suite for data model", function() {
+describe("A suite for e2e test", function() {
 	var server = null, casino = null;
 	
 	beforeEach(function() {
@@ -18,8 +18,8 @@ describe("A suite for data model", function() {
 	});
 
 	afterEach(function() {
-		if(server) server.shutdown();
-		if(casino) casino.shutdown();
+		//if(server) server.shutdown();
+		//if(casino) casino.shutdown();
 		
 	});
 	
