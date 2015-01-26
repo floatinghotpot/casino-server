@@ -1,5 +1,6 @@
 # casino-server #
 
+[![npm version](https://badge.fury.io/js/casino-server.svg)](http://badge.fury.io/js/casino-server)
 [![Build Status](https://travis-ci.org/floatinghotpot/casino-server.svg)](https://travis-ci.org/floatinghotpot/casino-server)
 
 An online poker game server powered by redis, node.js and socket.io

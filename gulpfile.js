@@ -119,7 +119,7 @@ gulp.task('auto-ut', ['unit-test', 'build'], function(){
 
 gulp.task('auto-e2e', ['build', 'restart-casino-server', 'browser-sync'], function(){
 	
-	gulp.watch(['conf/*.js', 'spec/test_service.js'], ['restart-casino-server', 'build-js']);
+	gulp.watch(['conf/*.js', 'spec/e2e/test_service.js'], ['restart-casino-server', 'build-js']);
 	gulp.watch(['lib/*.js'], ['restart-casino-server', 'build-js']);
 	
 	gulp.watch(['wwwsrc/main.js', 'wwwsrc/js/*.js'], ['build-js', browsersync.reload]);
