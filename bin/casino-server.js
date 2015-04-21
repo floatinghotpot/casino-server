@@ -17,6 +17,6 @@ if(argv.r) {
 	if(words[1]) conf.redis.port = parseInt(words[1]);
 }
 
-var server = Server().startup( conf );
-var casino = Casino().startup( conf );
+var server = new Server().startup( conf );
+var casino = new Casino().startup( conf );
 
