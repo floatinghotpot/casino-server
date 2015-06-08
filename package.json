@@ -1,6 +1,6 @@
 {
   "name": "casino-server",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "An multi-rule scalable online poker game server powered by redis, node.js and socket.io",
   "main": "index.js",
   "scripts": {

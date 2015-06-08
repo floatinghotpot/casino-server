@@ -490,6 +490,8 @@ function login(u, p) {
 		passwd: p
 	}, function(err,ret){
 		if(err) {
+            localStorage.removeItem('x_userid');
+		  localStorage.removeItem('x_passwd');
 			echo(ret);
 			socket.emit('hello', {});
 		} else {
@@ -510,10 +512,6 @@ function login(u, p) {
 			}
 		}
 		
-	}, function(err){
-		localStorage.removeItem('x_userid');
-		localStorage.removeItem('x_passwd');
-		echo(err);
 	});
 }
 
