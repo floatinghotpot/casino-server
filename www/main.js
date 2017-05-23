@@ -491,6 +491,8 @@ function login(u, p) {
 		passwd: p
 	}, function(err,ret){
 		if(err) {
+            localStorage.removeItem('x_userid');
+		  localStorage.removeItem('x_passwd');
 			echo(ret);
 			socket.emit('hello', {});
 		} else {
@@ -511,10 +513,6 @@ function login(u, p) {
 			}
 		}
 		
-	}, function(err){
-		localStorage.removeItem('x_userid');
-		localStorage.removeItem('x_passwd');
-		echo(err);
 	});
 }
 
@@ -726,8 +724,8 @@ Client.prototype.setUplink = function(socket) {
 		socket.rpc_seq = 0;
 		socket.rpc_callbacks = {};
 		
-		socket.on('push', function( msg ){ // { uid:x, e:xx, args:xxx }
-			if(socket.log_traffic) console.log('push', msg);
+		socket.on('notify', function( msg ){ // { uid:x, e:xx, args:xxx }
+			if(socket.log_traffic) console.log('notify', msg);
 			
 			if(! msg) return;
 			if(typeof msg !== 'object') return;
@@ -739,13 +737,13 @@ Client.prototype.setUplink = function(socket) {
 			var target;
 			if(msg.uid) {
 				target = socket.gamers[ msg.uid ];
-				if(target) target.onPush( event, args );
+				if(target) target.onNotify( event, args );
 				
 			} else {
 				var gamers = socket.gamers;
 				for(var uid in gamers) {
 					target = gamers[ uid ];
-					if(target) target.onPush( event, args );				
+					if(target) target.onNotify( event, args );
 				}
 			}
 		});
@@ -802,7 +800,7 @@ Client.prototype.filterCmds = function(cmds) {
 	}
 };
 
-Client.prototype.onPush = function(event, args) {
+Client.prototype.onNotify = function(event, args) {
 	switch(event) {
 	case 'prompt':
 		this.filterCmds(args);
@@ -813,7 +811,7 @@ Client.prototype.onPush = function(event, args) {
 	case 'enter':
 		this.room.gamers[ args.who.uid ] = args.who;
 		break;
-	case 'exit':
+	case 'leave':
 		args.who = this.room.gamers[ args.uid ];
 		break;
 	case 'takeseat':
@@ -882,7 +880,7 @@ Client.prototype.removeUplink = function() {
  * look, 0
  * takeseat, seat or ''
  * unseat, 0
- * exit, 0
+ * leave, 0
  * 
  * follow, 0
  * addchip, n
@@ -1014,6 +1012,7 @@ Holdem.sort = function(cards) {
 		d2 = n2 - n3,
 		d3 = n3 - n4;
 
+
 	if((d1 === 0) && (d2 === 0)) {
 		if(d0 === 0) { 
 			// XXXXM
@@ -1031,7 +1030,7 @@ Holdem.sort = function(cards) {
 		// MNXXX -> XXXMN
 		cards.push( cards.shift() );
 		cards.push( cards.shift() );
-	} else if((d0 === 0) && (d1 === 0)) { 
+	} else if((d0 === 0) && (d2 === 0)) {   //edit by kalbas d1->d2
 		// XXYYM
 	} else if((d0 === 0) && (d3 === 0)) {
 		// XXMYY -> XXYYM
@@ -1053,6 +1052,11 @@ Holdem.sort = function(cards) {
 		cards.splice(2, 2);
 		cards.unshift(c_3);
 		cards.unshift(c_2);
+	} else if(d3 === 0) {               //edit by kalbas added d3 condition
+		// ABCXX -> XXABC
+		cards.push( cards.shift() );
+		cards.push( cards.shift() );
+		cards.push( cards.shift() );
 	} else {
 		// ABCDE
 	}
@@ -1082,12 +1086,28 @@ Holdem.rank = function(cards) {
 		d3 = n3 - n4;
 	
 	var isFlush = ((c0 === c1) && (c1 === c2) && (c2 === c3) && (c3 === c4));
-	var isStraight = ((d0 === 1) && (d1 === 1) && (d2 === 1) && (d3 === 1));
+	var isStraight;
+	
+	if ((n0 === 14) && (d0 === 9)){
+	    isStraight = ((n0 === 14) && (d0 === 9) && (d1 === 1) && (d2 === 1) && (d3 === 1)); // edited by kalbas A 5 4 3 2 1 straight
+	} else {
+	    isStraight = ((d0 === 1) && (d1 === 1) && (d2 === 1) && (d3 === 1));
+	}
+	
 	var rank = (n0 << 16) | (n1 << 12) | (n2 << 8) | (n3 << 4) | n4;
+	
+	//edit by kalbas
+	//if we face an A5432 straight we should n0=1 and then calculate the rank
+	if ((n0 === 14) && (d0 === 9) && (d1 === 1) && (d2 === 1) && (d3 === 1)) {
+	    var exceptionaln0 = 1;
+	    rank = (exceptionaln0 << 16) | (n1 << 12) | (n2 << 8) | (n3 << 4) | n4;
+	}
+	//end edit by kalbas
+	
 	var pattern = 0;
 	
 	if(isFlush && isStraight) {
-		if(n0 === 14) { // Poker.NUMBER_RANK['A']
+		if(n4 === 10) { // Poker.NUMBER_RANK['A'] // edited by kalbas, n0=14 can be A5432 too, we use n4=11=jack
 			pattern = ROYAL_FLUSH;
 		} else {
 			pattern = STRAIGHT_FLUSH;
@@ -1147,6 +1167,7 @@ Holdem.maxFive = function(private_cards, shared_cards) {
 		}
 		
 	} else if(len === 7) {
+		/*
 		for(i=0; i<7; i++) {
 			for(j=0; j<6; j++) {
 				tmp = Poker.clone(cards);
@@ -1159,6 +1180,79 @@ Holdem.maxFive = function(private_cards, shared_cards) {
 				}
 			}
 		}
+		*/
+		
+		
+		// edit start by kalbas 
+		// we rank only board cards at first, all 5 of them
+		
+		tmprank = Holdem.rank( shared_cards );
+		if(tmprank > maxrank) {
+					maxrank = tmprank;
+					maxcards = shared_cards;
+		}
+		
+		// we rank 1st hole card + 4 board cards
+		
+		for(j=0; j<5; j++) {
+		    tmp = Poker.clone( shared_cards );
+		    tmp.splice(j,1);
+		    tmp.push( private_cards[0] );
+		    tmprank = Holdem.rank( tmp );
+		    if(tmprank > maxrank) {
+					maxrank = tmprank;
+					maxcards = tmp;
+		    }
+		}
+		
+		// we rank 2nd hole card + 4 board cards
+		
+		for(j=0; j<5; j++) {
+		    tmp = Poker.clone( shared_cards );
+		    tmp.splice(j,1);
+		    tmp.push( private_cards[1] );
+		    tmprank = Holdem.rank( tmp );
+		    if(tmprank > maxrank) {
+					maxrank = tmprank;
+					maxcards = tmp;
+		    }
+		}
+		
+		// we rank two hole cards + 3 board cards
+		
+		var iii = [1,1,1,1,1,1,2,2,2,3];
+		var jjj = [2,2,2,3,3,4,3,3,4,4];
+		var kkk = [3,4,5,4,5,5,4,5,5,5];
+		
+		/*
+		There are 10 ways to choose 3
+		cards out of 5, (5x4x3)/(3x2x1)
+		
+		123(45) 124(35) 125(34) 134(25)
+		135(24) 145(23) 234(15) 235(14)
+		245(13) 345(12) therefore:
+		
+		push : iii[n] + jjj[n] + kkk[n]
+		and then add two hole cards
+		*/
+		
+		for(j=0; j<10; j++) {
+    		tmp = [];
+    		tmp.push( shared_cards[iii[j]-1] );
+    		tmp.push( shared_cards[jjj[j]-1] );
+    		tmp.push( shared_cards[kkk[j]-1] );
+    		tmp.push( private_cards[0] );
+    		tmp.push( private_cards[1] );
+    		tmprank = Holdem.rank( tmp );
+    		if(tmprank > maxrank) {
+    		    maxrank = tmprank;
+    			maxcards = tmp;
+    		}
+		}
+		cards = maxcards;
+        	console.log(Poker.visualize(cards)+' : '+Holdem.patternString(cards));
+		// end edit by kalbas
+		
 	}
 	
 	return maxcards;
