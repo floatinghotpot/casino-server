@@ -28,7 +28,7 @@ Features:
 
 TODO List:
 - [ ] Load balancing: using NginX as load balancer.
-- [ ] Client API in other language (priority: C/C++, C#, Java, Objective-C, etc.)
+- [ ] Client API in other language (priority: C# for Unity, Java, Objective-C, C/C++, etc.)
 - [ ] Payment gateway callback URL.
 - [ ] Admin Portal.
 
@@ -114,6 +114,9 @@ Or, log the events into log file:
 ```bash
 bin/logger.js -o ./tmp/casino.log
 ```
+# See Also
+
+* ![socket.io for Unity3D](https://github.com/floatinghotpot/socket.io-unity), is a socket.io client library for Unity3D. You can develop casino games with Unity3D, and using this library to connect to this casino server.
 
 # Credits #
 
@@ -132,6 +135,6 @@ If you are interested in this project, you can contribute in any of following as
 * Use it or test it, report bugs or even send pull request of patches.
 * Add better HTML5 demo client.
 * Add new poker game rules.
-* Add client APIs in other languages (like C/C++, C#, Java, etc.)
+* Add client APIs in other languages (like C# for Unity, Java, Objective-C, C/C++, etc.)
 * Help us write documentation, if your English is good.
 
