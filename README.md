@@ -27,10 +27,10 @@ Features:
 - [x] Event logger for server events and user actions.
 
 TODO List:
-- [ ] Load balancing: using NginX as load balancer.
-- [ ] Client API in other language (priority: C# for Unity, Java, Objective-C, C/C++, etc.)
+- [ ] Client API for Unity3D (C#, support mono/.NET2.0)
 - [ ] Payment gateway callback URL.
 - [ ] Admin Portal.
+- [ ] Load balancing: using NginX, or auto handled if deployed to Amazon Cloud.
 
 # Architecture #
 
@@ -116,7 +116,7 @@ bin/logger.js -o ./tmp/casino.log
 ```
 # See Also
 
-* ![socket.io for Unity3D](https://github.com/floatinghotpot/socket.io-unity), is a socket.io client library for Unity3D. You can develop casino games with Unity3D, and using this library to connect to this casino server.
+* [socket.io for Unity3D](https://github.com/floatinghotpot/socket.io-unity), is a socket.io client library for Unity3D. You can develop casino games with Unity3D, and using this library to connect to this casino server.
 
 # Credits #
 
