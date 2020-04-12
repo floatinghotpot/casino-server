@@ -236,10 +236,11 @@ $(document).ready(function(){
 		}
 	});
 	
-	client.on('gameover', function(ret){
+	client.on('gameover', function(args){
 		addMsg( _T('game over!'));
 	 	// if only one player remained, we should not show the cards
-		var showdown = client.room.ingamers_count > 0;
+		var showdown = args.showdown;
+		var ret = args.scores;
 		if (!showdown) {
 			addMsg('Only one player remained.');
 		}
