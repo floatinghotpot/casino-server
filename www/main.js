@@ -163,6 +163,7 @@ $(document).ready(function(){
 	client.on('countdown', function(ret){
 		addMsg(_T('count down:') + ret.seat + ', ' + ret.sec);
 	});
+
 	
 	client.on('fold', function(ret){
 		addMsg( ret.uid + _T_('at seat') + ret.seat + _T_('fold'));
@@ -237,27 +238,37 @@ $(document).ready(function(){
 	
 	client.on('gameover', function(ret){
 		addMsg( _T('game over!'));
-		
+	 	// if only one player remained, we should not show the cards
+		var showdown = client.room.ingamers_count > 0;
+		if (!showdown) {
+			addMsg('Only one player remained.');
+		}
 		var shared_cards = client.room.shared_cards;
 		var gamers = client.room.gamers;
 		var cards = client.room.cards;
 		var chips = client.room.chips;
 		while(ret.length > 0) {
+			
 			var gamer = ret.shift();
 			var uid = gamer.uid;
 			
 			var n = (gamer.prize - gamer.chips);
 			if(n > 0) n = '+' + n;
-			
+
 			var mycards = gamer.cards;
 			var pattern = '';
 			if(mycards.length === 3) {
 				pattern = Jinhua.patternString(mycards);
 				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + _T_(pattern) );
 			} else {
-				var maxFive = Holdem.sort( Holdem.maxFive(mycards, shared_cards) );
-				pattern = Holdem.patternString( maxFive );
-				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + _T_(pattern) + ' (' + Poker.visualize(maxFive) + ')' );
+				if (showdown) {
+					var maxFive = Holdem.sort( Holdem.maxFive(mycards, shared_cards) );
+					pattern = Holdem.patternString( maxFive );
+				
+					addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + _T_(pattern) + ' (' + Poker.visualize(maxFive) + ')' );} else {
+				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n);
+				}
+
 			}
 			
 			cards[ gamer.seat ] = gamer.cards;
