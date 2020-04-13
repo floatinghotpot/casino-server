@@ -170,6 +170,7 @@ $(document).ready(function(){
 	});
 	
 	client.on('call', function(ret){
+		
 		var seat = parseInt(ret.seat);
 		addMsg( ret.uid + _T_('at seat') + seat + _T_('call') + ret.call);
 		
@@ -205,6 +206,24 @@ $(document).ready(function(){
 			gamers[ ret.uid ].coins -= raise_sum;
 		}
 		
+		showRoom(client.room);
+	});
+
+	client.on('all_in', function(ret){
+
+		var seat = parseInt(ret.seat);
+		var gamers = client.room.gamers;
+		raise_sum = gamers[ret.uid].coins
+		client.room.pot += raise_sum 
+		gamers[ret.uid].coins = 0
+		addMsg(ret.uid + _T_('at seat') + seat + ' all in with raise of ' + raise_sum);
+		gamers[ret.uid].is_allin = true;
+
+		var chips = client.room.chips;
+		if(chips) {
+			chips[ seat ] += raise_sum;
+		}
+	
 		showRoom(client.room);
 	});
 
