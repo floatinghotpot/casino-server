@@ -216,7 +216,7 @@ $(document).ready(function(){
 		raise_sum = gamers[ret.uid].coins
 		client.room.pot += raise_sum 
 		gamers[ret.uid].coins = 0
-		addMsg(ret.uid + _T_('at seat') + seat + ' all in with raise of ' + raise_sum);
+		addMsg(ret.uid + _T_('at seat') + seat + ' all in with ' + raise_sum );
 		gamers[ret.uid].is_allin = true;
 
 		var chips = client.room.chips;
@@ -629,7 +629,6 @@ function showRoom(room) {
 		if(g) {
 			str += g.uid + ' (' + g.name + ') [' + g.coins + ', ' + g.score + ', ' + g.exp + ', ' + g.level + ']';
 			if(cards && cards[i]) {
-				str += _T_('private cards') + '[ ' + Poker.visualize( cards[i] ) + ' ]';
 				
 				if(g.uid === client.uid) {
 					$('#mycards').html( client.uid + ', ' + _T('my cards') + ': <br/>' + Poker.toHTML(cards[i]) );
