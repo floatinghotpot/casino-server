@@ -163,12 +163,14 @@ $(document).ready(function(){
 	client.on('countdown', function(ret){
 		addMsg(_T('count down:') + ret.seat + ', ' + ret.sec);
 	});
+
 	
 	client.on('fold', function(ret){
 		addMsg( ret.uid + _T_('at seat') + ret.seat + _T_('fold'));
 	});
 	
 	client.on('call', function(ret){
+		
 		var seat = parseInt(ret.seat);
 		addMsg( ret.uid + _T_('at seat') + seat + _T_('call') + ret.call);
 		
@@ -207,6 +209,24 @@ $(document).ready(function(){
 		showRoom(client.room);
 	});
 
+	client.on('all_in', function(ret){
+
+		var seat = parseInt(ret.seat);
+		var gamers = client.room.gamers;
+		raise_sum = gamers[ret.uid].coins
+		client.room.pot += raise_sum 
+		gamers[ret.uid].coins = 0
+		addMsg(ret.uid + _T_('at seat') + seat + ' all in with ' + raise_sum );
+		gamers[ret.uid].is_allin = true;
+
+		var chips = client.room.chips;
+		if(chips) {
+			chips[ seat ] += raise_sum;
+		}
+	
+		showRoom(client.room);
+	});
+
 	client.on('pk', function(ret){
 		addMsg( ret.uid + _T_('at seat') + ret.seat +  _T('pk') + ret.pk_uid + _T_('at seat') + ret.pk_seat + ', ' + _T('result') + ': ' + (ret.win?_T('win'):_T('fail')));
 		
@@ -235,29 +255,40 @@ $(document).ready(function(){
 		}
 	});
 	
-	client.on('gameover', function(ret){
+	client.on('gameover', function(args){
 		addMsg( _T('game over!'));
-		
+	 	// if only one player remained, we should not show the cards
+		var showdown = args.showdown;
+		var ret = args.scores;
+		if (!showdown) {
+			addMsg('Only one player remained.');
+		}
 		var shared_cards = client.room.shared_cards;
 		var gamers = client.room.gamers;
 		var cards = client.room.cards;
 		var chips = client.room.chips;
 		while(ret.length > 0) {
+			
 			var gamer = ret.shift();
 			var uid = gamer.uid;
 			
 			var n = (gamer.prize - gamer.chips);
 			if(n > 0) n = '+' + n;
-			
+
 			var mycards = gamer.cards;
 			var pattern = '';
 			if(mycards.length === 3) {
 				pattern = Jinhua.patternString(mycards);
 				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + _T_(pattern) );
 			} else {
-				var maxFive = Holdem.sort( Holdem.maxFive(mycards, shared_cards) );
-				pattern = Holdem.patternString( maxFive );
-				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + _T_(pattern) + ' (' + Poker.visualize(maxFive) + ')' );
+				if (showdown) {
+					var maxFive = Holdem.sort( Holdem.maxFive(mycards, shared_cards) );
+					pattern = Holdem.patternString( maxFive );
+				
+					addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n + ', ' + _T_(pattern) + ' (' + Poker.visualize(maxFive) + ')' );} else {
+				addMsg( '#' + gamer.seat + ', ' + uid + ': ' + n);
+				}
+
 			}
 			
 			cards[ gamer.seat ] = gamer.cards;
@@ -598,7 +629,6 @@ function showRoom(room) {
 		if(g) {
 			str += g.uid + ' (' + g.name + ') [' + g.coins + ', ' + g.score + ', ' + g.exp + ', ' + g.level + ']';
 			if(cards && cards[i]) {
-				str += _T_('private cards') + '[ ' + Poker.visualize( cards[i] ) + ' ]';
 				
 				if(g.uid === client.uid) {
 					$('#mycards').html( client.uid + ', ' + _T('my cards') + ': <br/>' + Poker.toHTML(cards[i]) );
